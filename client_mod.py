@@ -158,9 +158,12 @@ def main():
     limb_interface = baxter_interface.limb.Limb(limb)
     current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
     traj.add_point_p(current_angles, 0.0)
+    t_delay = 3.0
+    traj.add_point_p(q_start.tolist(),t_delay)
 
-    T = 5 # set time scale
-    tSpace = np.linspace(0,T,100);
+    T = .75 # set time scale
+    N = 100*T # set divisions
+    tSpace = np.linspace(0,T,N);
     a = np.array([[1,0,0,0,0,0],[1,1*T,1*T**2,1*T**3,1*T**4,1*T**5],[0,1,0,0,0,0],[0,1,2*T,3*T**2,4*T**3,5*T**4],[0,0,2,0,0,0],[0,0,2,6*T,12*T**2,20*T**3]])
 
     # Calculate trajectories
@@ -172,7 +175,7 @@ def main():
         jAa = jointAcceleration(tSpace,coeff)
         b = np.array([q_throw[i],q_end[i],q_dot[i],0,0,0])
         coeff = np.linalg.solve(a,b)
-        jPb = jointPath(tSpace,coeff)
+        jPb = jointPath(tSpace,coeff) 
         jVb = jointVelocity(tSpace,coeff)
         jAb = jointAcceleration(tSpace,coeff)
         jP = np.hstack((jPa,jPb))
@@ -186,10 +189,10 @@ def main():
             jP_all = np.vstack((jP_all, jP))
             jV_all = np.vstack((jV_all, jV))
             jA_all = np.vstack((jA_all, jA))
-    t_all = np.linspace(0,2*T,100);
+    t_all = np.linspace(0 + t_delay,2*T + t_delay, N*2);
 
-    for i in range(200):
-        traj.add_point(jP_all[:,i]), jV_all[:,i], jA_all[:,i],t_all[i])
+    for i in range(int(2*N)):
+        traj.add_point(jP_all[:,i].tolist(), jV_all[:,i].tolist(), jA_all[:,i].tolist(),t_all[i])
     # p2 = positionS[limb]
     # p3 = positionT[limb]
     # p4 = positionE[limb]
@@ -202,7 +205,7 @@ def main():
     # for i in range(100):
     #     traj.add_point(path2[i,:], vel2[i,:], acc2[i,:], 3 + T1 + tSpace2[i])
     traj.start()
-    traj.wait(10.0)
+    traj.wait(30.0)
     print("Exiting - Joint Trajectory Action Test Complete")
 
 
