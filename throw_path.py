@@ -121,8 +121,8 @@ def main():
     traj = Trajectory(limb)
     rospy.on_shutdown(traj.stop)
     # Command Current Joint Positions first
-    # limb_interface = baxter_interface.limb.Limb(limb)
-    # current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
+    limb_interface = baxter_interface.limb.Limb(limb)
+    current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
     # traj.add_point(current_angles, 0.0)
 
     # p1 = positions[limb]
@@ -130,37 +130,60 @@ def main():
     # traj.add_point([x * 0.75 for x in p1], 9.0)
     # traj.add_point([x * 1.25 for x in p1], 12.0)
 
-    q_start = np.array([-0.61159692 , 0.75344562 , 1.05147772 , 1.60237397 ,  2.13362129 ,  1.12027284, 
-      1.95830825])
-    q_throw = np.array([ 0.55703127,  1.02672179,  2.36138413,  1.08580171,  3.05891801,
-     -1.42679103, -0.42898074])
-    q_end = np.array([ 0.84862266 ,  0.97046182 ,  2.15649338 ,  1.77949586,   2.03984311 ,  1.74583931, 
-      1.06574319])
-    N = 1
+    q_start = np.array([0.2339320701525256,
+ -0.5878981369570848,
+ 0.19903400722813244,
+ 1.8561167533413507,
+ -0.4908738521233324,
+ -0.97752925707998,
+ -0.49547579448698864])
+    q_throw = np.array([0.9265243958827899,
+ -0.7827136970185323,
+ -0.095490304045867,
+ 1.8338740319170121,
+ -0.03681553890924993,
+ -0.9909515889739773,
+ -0.5840631849873713])
+    q_dot = np.array([-0.23825794, -0.13400971,  0.04931685,  0.0264105 , -0.8301056 ,
+          0.28080345,  0.39270727])
+    q_end = np.array([1.0791554842773885,
+ -0.7995874856852719,
+ 0.21015536794030168,
+ 1.7617769348863976,
+ 0.4348835533655148,
+ -0.847524385306691,
+ -0.566422405926689])
+    
+    # N = 1
+    # path1 = JointTrajectorySpeedUp(q_start,q_throw,N,100,1);
+    # path2 = JointTrajectorySlowDown(q_throw,q_start,N,100,1)
+    # vel1 = np.diff(path1,axis=0)
+    # vel1 = np.vstack(([0,0,0,0,0,0,0],vel1))
+    # vel2 = np.diff(path2,axis=0)
+    # vel2 = np.vstack(([0,0,0,0,0,0,0],vel2))
+    # acc1 = np.diff(vel1,axis=0)
+    # acc1 = np.vstack(([0,0,0,0,0,0,0],acc1))
+    # acc2 = np.diff(vel2,axis=0)
+    # acc2 = np.vstack(([0,0,0,0,0,0,0],acc2))
+    # tSpace = np.linspace(0,N,100)
 
-    path1 = JointTrajectorySpeedUp(q_start,q_throw,N,100,1);
-    path2 = JointTrajectorySlowDown(q_throw,q_start,N,100,1)
-    vel1 = np.diff(path1,axis=0)
-    vel1 = np.vstack(([0,0,0,0,0,0,0],vel1))
-    vel2 = np.diff(path2,axis=0)
-    vel2 = np.vstack(([0,0,0,0,0,0,0],vel2))
-    acc1 = np.diff(vel1,axis=0)
-    acc1 = np.vstack(([0,0,0,0,0,0,0],acc1))
-    acc2 = np.diff(vel2,axis=0)
-    acc2 = np.vstack(([0,0,0,0,0,0,0],acc2))
-    tSpace = np.linspace(0,N,100)
-
-    traj.add_point_p(path1[0,:],3)
+    # traj.add_point_p(path1[0,:],3)
+    # traj.start()
+    traj.add_point_p(current_angles, 0.0)
+    traj.add_point_p(q_start,7)
+    traj.add_point_p(q_throw,9)
+    # traj.add_point_p(q_end,21)
     traj.start()
-    traj.wait(7)
+    traj.wait(6)
 
-    for i in range(100):
-        pos = path1[i,:]
-        vel = vel1[i,:]
-        acc = acc1[i,:]
-        time = tSpace[i]
-        # traj.add_point(pos,vel,acc,time)
-        traj.add_point_p(pos,time)
+
+    # for i in range(100):
+    #     pos = path1[i,:]
+    #     vel = vel1[i,:]
+    #     acc = acc1[i,:]
+    #     time = tSpace[i]
+    #     # traj.add_point(pos,vel,acc,time)
+    #     traj.add_point_p(pos,time)
 
     # for i in range(100):
     #     pos = path2[i,:]
