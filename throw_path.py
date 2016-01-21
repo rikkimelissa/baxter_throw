@@ -1,8 +1,34 @@
 #!/usr/bin/env python
+
+# Copyright (c) 2013-2015, Rethink Robotics
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. Neither the name of the Rethink Robotics nor the names of its
+#    contributors may be used to endorse or promote products derived from
+#    this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 """
 Baxter RSDK Joint Trajectory Action Client Example
-rosrun baxter_interface joint_trajectory_action_server.py
-rosrun baxter_examples joint_recorder.py -f "test"
 """
 import argparse
 import sys
@@ -25,9 +51,10 @@ import baxter_interface
 
 from baxter_interface import CHECK_VERSION
 
+from functions import JointTrajectory
 import numpy as np
+from solve_system import jointPath, jointVelocity, jointAcceleration
 
-import rosbag
 
 class Trajectory(object):
     def __init__(self, limb):
@@ -37,7 +64,7 @@ class Trajectory(object):
             FollowJointTrajectoryAction,
         )
         self._goal = FollowJointTrajectoryGoal()
-        self._goal_time_tolerance = rospy.Time(0.2)
+        self._goal_time_tolerance = rospy.Time(0.1)
         self._goal.goal_time_tolerance = self._goal_time_tolerance
         server_up = self._client.wait_for_server(timeout=rospy.Duration(10.0))
         if not server_up:
@@ -48,7 +75,13 @@ class Trajectory(object):
             sys.exit(1)
         self.clear(limb)
 
-    def add_point(self, positions, velocities, accelerations,time):
+    def add_point_p(self, positions, time):
+        point = JointTrajectoryPoint()
+        point.positions = copy(positions)
+        point.time_from_start = rospy.Duration(time)
+        self._goal.trajectory.points.append(point)
+
+    def add_point(self, positions, velocities, accelerations, time):
         point = JointTrajectoryPoint()
         point.positions = copy(positions)
         point.velocities = copy(velocities)
@@ -56,14 +89,7 @@ class Trajectory(object):
         point.time_from_start = rospy.Duration(time)
         self._goal.trajectory.points.append(point)
 
-    def add_point_p(self, positions,time):
-        point = JointTrajectoryPoint()
-        point.positions = copy(positions)
-        point.time_from_start = rospy.Duration(time)
-        self._goal.trajectory.points.append(point)
-
     def start(self):
-        print('started')
         self._goal.trajectory.header.stamp = rospy.Time.now()
         self._client.send_goal(self._goal)
 
@@ -118,115 +144,70 @@ def main():
         'right':  [0.11, -0.62,  1.15, 1.32, -0.80, 1.27, -2.39],
     }
 
+    q_start = np.array([0.2339320701525256,  -0.5878981369570848,  0.19903400722813244,  1.8561167533413507,
+     -0.4908738521233324,  -0.97752925707998,  -0.49547579448698864])
+    q_throw = np.array([0.9265243958827899,  -0.7827136970185323,  -0.095490304045867,  1.8338740319170121,
+     -0.03681553890924993,  -0.9909515889739773,  -0.5840631849873713])
+    q_dot = np.array([-0.23825794, -0.13400971,  0.04931685,  0.0264105 , -0.8301056 , 0.28080345,  0.39270727])
+    q_end = np.array([0.9085001216251363,  -1.0089758632316308, 0.07401457301547121, 1.8768254939778037,
+     0.18599517053110642, -0.8172282647459542, -0.44600491407768406])
+
     traj = Trajectory(limb)
     rospy.on_shutdown(traj.stop)
     # Command Current Joint Positions first
     limb_interface = baxter_interface.limb.Limb(limb)
     current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
-    # traj.add_point(current_angles, 0.0)
-
-    # p1 = positions[limb]
-    # traj.add_point(p1, 7.0)
-    # traj.add_point([x * 0.75 for x in p1], 9.0)
-    # traj.add_point([x * 1.25 for x in p1], 12.0)
-
-    q_start = np.array([0.2339320701525256,
- -0.5878981369570848,
- 0.19903400722813244,
- 1.8561167533413507,
- -0.4908738521233324,
- -0.97752925707998,
- -0.49547579448698864])
-    q_throw = np.array([0.9265243958827899,
- -0.7827136970185323,
- -0.095490304045867,
- 1.8338740319170121,
- -0.03681553890924993,
- -0.9909515889739773,
- -0.5840631849873713])
-    q_dot = np.array([-0.23825794, -0.13400971,  0.04931685,  0.0264105 , -0.8301056 ,
-          0.28080345,  0.39270727])
-    q_end = np.array([1.0791554842773885,
- -0.7995874856852719,
- 0.21015536794030168,
- 1.7617769348863976,
- 0.4348835533655148,
- -0.847524385306691,
- -0.566422405926689])
-    
-    # N = 1
-    # path1 = JointTrajectorySpeedUp(q_start,q_throw,N,100,1);
-    # path2 = JointTrajectorySlowDown(q_throw,q_start,N,100,1)
-    # vel1 = np.diff(path1,axis=0)
-    # vel1 = np.vstack(([0,0,0,0,0,0,0],vel1))
-    # vel2 = np.diff(path2,axis=0)
-    # vel2 = np.vstack(([0,0,0,0,0,0,0],vel2))
-    # acc1 = np.diff(vel1,axis=0)
-    # acc1 = np.vstack(([0,0,0,0,0,0,0],acc1))
-    # acc2 = np.diff(vel2,axis=0)
-    # acc2 = np.vstack(([0,0,0,0,0,0,0],acc2))
-    # tSpace = np.linspace(0,N,100)
-
-    # traj.add_point_p(path1[0,:],3)
-    # traj.start()
     traj.add_point_p(current_angles, 0.0)
-    traj.add_point_p(q_start,7)
-    traj.add_point_p(q_throw,9)
-    # traj.add_point_p(q_end,21)
-    traj.start()
-    traj.wait(6)
+    t_delay = 3.0
+    traj.add_point_p(q_start.tolist(),t_delay)
 
+    T = .75 # set time scale
+    N = 100*T # set divisions
+    tSpace = np.linspace(0,T,N);
+    a = np.array([[1,0,0,0,0,0],[1,1*T,1*T**2,1*T**3,1*T**4,1*T**5],[0,1,0,0,0,0],[0,1,2*T,3*T**2,4*T**3,5*T**4],[0,0,2,0,0,0],[0,0,2,6*T,12*T**2,20*T**3]])
 
+    # Calculate trajectories
+    for i in range(7):
+        b = np.array([q_start[i],q_throw[i],0,q_dot[i],0,0])
+        coeff = np.linalg.solve(a,b)
+        jPa = jointPath(tSpace,coeff)
+        jVa = jointVelocity(tSpace,coeff)
+        jAa = jointAcceleration(tSpace,coeff)
+        b = np.array([q_throw[i],q_end[i],q_dot[i],0,0,0])
+        coeff = np.linalg.solve(a,b)
+        jPb = jointPath(tSpace,coeff) 
+        jVb = jointVelocity(tSpace,coeff)
+        jAb = jointAcceleration(tSpace,coeff)
+        jP = np.hstack((jPa,jPb))
+        jV = np.hstack((jVa,jVb))
+        jA = np.hstack((jAa,jAb))
+        if i==0:
+            jP_all = jP
+            jV_all = jV
+            jA_all = jA
+        else:
+            jP_all = np.vstack((jP_all, jP))
+            jV_all = np.vstack((jV_all, jV))
+            jA_all = np.vstack((jA_all, jA))
+    t_all = np.linspace(0 + t_delay,2*T + t_delay, N*2);
+
+    for i in range(int(2*N)):
+        traj.add_point(jP_all[:,i].tolist(), jV_all[:,i].tolist(), jA_all[:,i].tolist(),t_all[i])
+    # p2 = positionS[limb]
+    # p3 = positionT[limb]
+    # p4 = positionE[limb]
+    # traj.add_point_p(p2, 3.0)
+    # traj.add_point(p3, velT[limb], 4)
+    # traj.add_point_p(p3, 4.0)
+    # traj.add_point_p(p4, 5)
     # for i in range(100):
-    #     pos = path1[i,:]
-    #     vel = vel1[i,:]
-    #     acc = acc1[i,:]
-    #     time = tSpace[i]
-    #     # traj.add_point(pos,vel,acc,time)
-    #     traj.add_point_p(pos,time)
-
+    #     traj.add_point(path1[i,:], vel1[i,:], acc1[i,:], 3 + tSpace1[i])
     # for i in range(100):
-    #     pos = path2[i,:]
-    #     vel = vel2[i,:]
-    #     acc = acc2[i,:]
-    #     time = tSpace[i] + N
-    #     traj.add_point(pos,vel,acc,7 + N + time)
-
+    #     traj.add_point(path2[i,:], vel2[i,:], acc2[i,:], 3 + T1 + tSpace2[i])
     traj.start()
-    print(traj.result())
-
-    traj.wait(15.0)
+    traj.wait(30.0)
     print("Exiting - Joint Trajectory Action Test Complete")
 
-def JointTrajectorySpeedUp(thStart, thEnd, T, N, timeScale):
-    thList = [thStart]
-    if (N < 2):
-        raise ValueError('N must be 2 or greater')
-    tSpace = np.linspace(0,T,N)
-    for t in tSpace[1:]:
-        s = jointUp(t,T)
-        th = (1-s)*thStart + s*thEnd
-        thList = np.concatenate((thList,[th]), axis=0)
-    return thList
-
-def JointTrajectorySlowDown(thStart, thEnd, T, N, timeScale):
-    thList = [thStart]
-    if (N < 2):
-        raise ValueError('N must be 2 or greater')
-    tSpace = np.linspace(0,T,N)
-    for t in tSpace[1:]:
-        s = jointDown(t,T)
-        th = (1-s)*thStart + s*thEnd
-        thList = np.concatenate((thList,[th]), axis=0)
-    return thList
-
-def jointUp(t,T):
-    s = (-3*t**5*(-2+T))/T**5 - (t**4*(15-7*T))/T**4  - (2*t**3*(-5+2*T))/T**3
-    return s
-
-def jointDown(t,T):
-    s = t - (3*t**5*(-2+T))/T**5 - (t**4*(15-8*T))/T**4  - (2*t**3*(-5+3*T))/T**3
-    return s
 
 if __name__ == "__main__":
     main()
