@@ -10,7 +10,9 @@ def jointPath(t,coeff):
 	a3 = coeff[3]
 	a4 = coeff[4]
 	a5 = coeff[5]
-	s = a0 + a1*t + a2*t**2 + a3*t**3 + a4*t**4 + a5*t**5
+	a6 = coeff[6]
+	a7 = coeff[7]
+	s = a0 + a1*t + a2*t**2 + a3*t**3 + a4*t**4 + a5*t**5 + a6*t**6 + a7*t**7
 	return s
 
 def jointVelocity(t,coeff):
@@ -20,7 +22,9 @@ def jointVelocity(t,coeff):
 	a3 = coeff[3]
 	a4 = coeff[4]
 	a5 = coeff[5]
-	v = a1 + 2*a2*t + 3*a3*t**2 + 4*a4*t**3 + 5*a5*t**4
+	a6 = coeff[6]
+	a7 = coeff[7]
+	v = a1 + 2*a2*t + 3*a3*t**2 + 4*a4*t**3 + 5*a5*t**4 + 6*a6*t**5 + 7*a7*t**6
 	return v
 
 def jointAcceleration(t,coeff):
@@ -30,8 +34,22 @@ def jointAcceleration(t,coeff):
 	a3 = coeff[3]
 	a4 = coeff[4]
 	a5 = coeff[5]
-	a = 2*a2 + 6*a3*t + 12*a4*t**2 + 20*a5*t**3
+	a6 = coeff[6]
+	a7 = coeff[7]
+	a = 2*a2 + 6*a3*t + 12*a4*t**2 + 20*a5*t**3 + 30*a6*t**4 + 42*a7*t**5
 	return a
+
+def jointJerk(t,coeff):
+	a0 = coeff[0]
+	a1 = coeff[1]
+	a2 = coeff[2]
+	a3 = coeff[3]
+	a4 = coeff[4]
+	a5 = coeff[5]
+	a6 = coeff[6]
+	a7 = coeff[7]
+	j = 6*a3 + 24*a4*t + 60*a5*t**2 + 120*a6*t**3 + 210*a7*t**4
+	return j
 
 def example():
 	q_start = np.array([0.2339320701525256,  -0.5878981369570848,  0.19903400722813244,  1.8561167533413507,
@@ -41,23 +59,26 @@ def example():
 	q_dot = np.array([-0.23825794, -0.13400971,  0.04931685,  0.0264105 , -0.8301056 , 0.28080345,  0.39270727])
 	q_end = np.array([0.9085001216251363,  -1.0089758632316308, 0.07401457301547121, 1.8768254939778037,
 	 0.18599517053110642, -0.8172282647459542, -0.44600491407768406])
+	jerk = -10;
 
 	colors = ['r','b','c','y','m','oc','k']
 	plt.close('all')
 
-	T = 5
-	tSpace = np.linspace(0,T,101);
+	T = 3
+	N = 200*T
+	tSpace = np.linspace(0,T,N);
 	tOffset = T
-	a = np.array([[1,0,0,0,0,0],[1,1*T,1*T**2,1*T**3,1*T**4,1*T**5],[0,1,0,0,0,0],[0,1,2*T,3*T**2,4*T**3,5*T**4],[0,0,2,0,0,0],[0,0,2,6*T,12*T**2,20*T**3]])
+	a = np.array([[1,0,0,0,0,0,0,0],[1,T,T**2,T**3,T**4,T**5,T**6,T**7],[0,1,0,0,0,0,0,0],[0,1,2*T,3*T**2,4*T**3,5*T**4,6*T**5,7*T**6],
+		[0,0,2,0,0,0,0,0],[0,0,2,6*T,12*T**2,20*T**3,30*T**4,42*T**5],[0,0,0,6,0,0,0,0],[0,0,0,6,24*T,60*T**2,120*T**3,210*T**4]])
 
 	for i in range(7):
 
-		b = np.array([q_start[i],q_throw[i],0,q_dot[i],0,0])
+		b = np.array([q_start[i],q_throw[i],0,q_dot[i],0,0,0,jerk])
 		coeff = np.linalg.solve(a,b)
 		j1Pa = jointPath(tSpace,coeff)
 		j1Va = jointVelocity(tSpace,coeff)
 		j1Aa = jointAcceleration(tSpace,coeff)
-		b = np.array([q_throw[i],q_end[i],q_dot[i],0,0,0])
+		b = np.array([q_throw[i],q_end[i],q_dot[i],0,0,0,jerk,0])
 		coeff = np.linalg.solve(a,b)
 		j1Pb = jointPath(tSpace,coeff)
 		j1Vb = jointVelocity(tSpace,coeff)
@@ -90,3 +111,5 @@ def example():
 
 	plt.show(block=False)
 
+if __name__ == "__main__":
+    example()

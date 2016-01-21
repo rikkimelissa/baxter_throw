@@ -148,7 +148,8 @@ def main():
      -0.4908738521233324,  -0.97752925707998,  -0.49547579448698864])
     q_throw = np.array([0.9265243958827899,  -0.7827136970185323,  -0.095490304045867,  1.8338740319170121,
      -0.03681553890924993,  -0.9909515889739773,  -0.5840631849873713])
-    q_dot = np.array([-0.23825794, -0.13400971,  0.04931685,  0.0264105 , -0.8301056 , 0.28080345,  0.39270727])
+    # q_dot = np.array([-0.23825794, -0.13400971,  0.04931685,  0.0264105 , -0.8301056 , 0.28080345,  0.39270727])
+    q_dot = np.array([ -0.675,  -0.675,  0.675,  0.675,  -0.9  ,  0.9  ,  0.9  ])
     q_end = np.array([0.9085001216251363,  -1.0089758632316308, 0.07401457301547121, 1.8768254939778037,
      0.18599517053110642, -0.8172282647459542, -0.44600491407768406])
 
@@ -158,22 +159,24 @@ def main():
     limb_interface = baxter_interface.limb.Limb(limb)
     current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
     traj.add_point_p(current_angles, 0.0)
-    t_delay = 3.0
+    t_delay = 5.0
     traj.add_point_p(q_start.tolist(),t_delay)
 
-    T = .75 # set time scale
-    N = 100*T # set divisions
+    T = 3 # set time scale
+    N = 200*T # set divisions
     tSpace = np.linspace(0,T,N);
-    a = np.array([[1,0,0,0,0,0],[1,1*T,1*T**2,1*T**3,1*T**4,1*T**5],[0,1,0,0,0,0],[0,1,2*T,3*T**2,4*T**3,5*T**4],[0,0,2,0,0,0],[0,0,2,6*T,12*T**2,20*T**3]])
+    jerk = -12
+    a = np.array([[1,0,0,0,0,0,0,0],[1,T,T**2,T**3,T**4,T**5,T**6,T**7],[0,1,0,0,0,0,0,0],[0,1,2*T,3*T**2,4*T**3,5*T**4,6*T**5,7*T**6],
+        [0,0,2,0,0,0,0,0],[0,0,2,6*T,12*T**2,20*T**3,30*T**4,42*T**5],[0,0,0,6,0,0,0,0],[0,0,0,6,24*T,60*T**2,120*T**3,210*T**4]])
 
     # Calculate trajectories
     for i in range(7):
-        b = np.array([q_start[i],q_throw[i],0,q_dot[i],0,0])
+        b = np.array([q_start[i],q_throw[i],0,q_dot[i],0,.5,0,jerk])
         coeff = np.linalg.solve(a,b)
         jPa = jointPath(tSpace,coeff)
         jVa = jointVelocity(tSpace,coeff)
         jAa = jointAcceleration(tSpace,coeff)
-        b = np.array([q_throw[i],q_end[i],q_dot[i],0,0,0])
+        b = np.array([q_throw[i],q_end[i],q_dot[i],.5,0,0,jerk,0])
         coeff = np.linalg.solve(a,b)
         jPb = jointPath(tSpace,coeff) 
         jVb = jointVelocity(tSpace,coeff)
