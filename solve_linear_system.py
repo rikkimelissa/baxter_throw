@@ -61,7 +61,7 @@ def jointJerk(t,coeff):
     j = 6*a3 + 24*a4*t + 60*a5*t**2 + 120*a6*t**3 + 210*a7*t**4
     return j
 
-def linearSpace():
+def linearSpace(plot, T,  N, vy, vz, jerk):
 
     robot = URDF.from_parameter_server()
     base_link = robot.get_root()
@@ -82,7 +82,7 @@ def linearSpace():
     X_start = np.asarray(kdl_kin.forward(q_start))
     X_throw = np.asarray(kdl_kin.forward(q_throw))
     X_end = np.asarray(kdl_kin.forward(q_end))
-    Vb = np.array([0,0,0,0,1,2])
+    Vb = np.array([0,0,0,0,vy,vz])
 
     xStart = X_start
     xEnd = X_throw
@@ -91,18 +91,19 @@ def linearSpace():
     aStart = np.array([0,0,0,0,0,0])
     aEnd = np.array([0,0,0,0,0,0])
     jStart = np.array([0,0,0,0,0,0])
-    jEnd = np.array([0,0,0,0,0,0])
+    jEnd = np.array([0,0,0,0,0,jerk])
 
-    T = .7
-    N = 200*T
+    # T = .7
+    # N = 200*T
     a = np.array([[1,0,0,0,0,0,0,0],[1,T,T**2,T**3,T**4,T**5,T**6,T**7],[0,1,0,0,0,0,0,0],[0,1,2*T,3*T**2,4*T**3,5*T**4,6*T**5,7*T**6],
         [0,0,2,0,0,0,0,0],[0,0,2,6*T,12*T**2,20*T**3,30*T**4,42*T**5],[0,0,0,6,0,0,0,0],[0,0,0,6,24*T,60*T**2,120*T**3,210*T**4]])
     tSpace = np.linspace(0,T,N);
     tOffset = T
     colors = ['r','b','c','y','m','oc','k']
 
-    # plt.close('all')
-    
+    if plot == True:
+        plt.close('all')
+
     pLista = np.empty((3,N))
     pListb = np.empty((3,N))
     vLista = np.empty((3,N))
@@ -129,14 +130,15 @@ def linearSpace():
         aLista[i,:] = j1Aa
         aListb[i,:] = j1Ab
 
-    # plt.figure()
-    # plt.plot(np.hstack((pLista,pListb)).transpose())
-    # plt.figure()
-    # plt.plot(np.hstack((vLista,vListb)).transpose())
-    # plt.figure()
-    # plt.plot(np.hstack((aLista,aListb)).transpose())
+    if plot == True:
+        plt.figure()
+        plt.plot(np.hstack((pLista,pListb)).transpose())
+        plt.figure()
+        plt.plot(np.hstack((vLista,vListb)).transpose())
+        plt.figure()
+        plt.plot(np.hstack((aLista,aListb)).transpose())
 
-    # plt.show(block=False)
+        plt.show(block=False)
 
     Xlista = np.empty((N,4,4))
     Xlistb = np.empty((N,4,4))
@@ -151,17 +153,17 @@ def linearSpace():
         Xlistb[i] = RpToTrans(Rb,pb)
         i = i + 1
 
-    XlistT = np.vstack((Xlista,Xlistb))
+    XlistT = np.vstack((Xlista,Xlistb[1:,:,:]))
 
     q0 = kdl_kin.random_joint_angles()
     current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
     for ind in range(len(q0)):
         q0[ind] = q_start[ind]
 
-    thList = np.empty((N,7))
+    thList = np.empty((N*2-1,7))
     thList[0] = q0;
     
-    for i in range(int(N)-1):
+    for i in range(int(2*N)-2):
     # Solve for joint angles
         seed = 0
         q_ik = kdl_kin.inverse(XlistT[i+1], thList[i])
@@ -173,11 +175,12 @@ def linearSpace():
                 break
         thList[i+1] = q_ik
 
-    return thList
+    if plot == True:
+        plt.figure()
+        plt.plot(thList)
+        plt.show(block=False)
 
-    # plt.figure()
-    # plt.plot(thList)
-    # plt.show(block=False)
+    return thList
 
 def ex2():
     color = colors[i]
