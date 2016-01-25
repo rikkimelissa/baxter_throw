@@ -145,8 +145,20 @@ def main():
         'right':  [0.11, -0.62,  1.15, 1.32, -0.80, 1.27, -2.39],
     }
 
-    q_start = np.array([0.2339320701525256,  -0.5878981369570848,  0.19903400722813244,  1.8561167533413507,
- -0.4908738521233324,  -0.97752925707998,  -0.49547579448698864])
+ #    q_start = np.array([0.2339320701525256,  -0.5878981369570848,  0.19903400722813244,  1.8561167533413507,
+ # -0.4908738521233324,  -0.97752925707998,  -0.49547579448698864])
+ #    q_throw = np.array([0.9265243958827899,  -0.7827136970185323,  -0.095490304045867,  1.8338740319170121,
+ #     -0.03681553890924993,  -0.9909515889739773,  -0.5840631849873713])
+ #    q_end = np.array([0.9085001216251363,  -1.0089758632316308, 0.07401457301547121, 1.8768254939778037,
+ #     0.18599517053110642, -0.8172282647459542, -0.44600491407768406])
+
+
+    q_throw = np.array([ 0.47668453, -0.77274282,  0.93150983,  2.08352941,  0.54149522,
+       -1.26745163, -2.06742261])
+    q_end = np.array([ 0.75356806, -0.89162633,  0.54648066,  2.08698086,  0.41033986,
+       -1.18423317, -1.15815549])
+    q_start = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
+       -1.16889336, -0.90888362])
 
     traj = Trajectory(limb)
     rospy.on_shutdown(traj.stop)
@@ -155,32 +167,41 @@ def main():
     current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
     traj.add_point_p(current_angles, 0.0)
     t_delay = 5.0
-    traj.add_point_p(q_start.tolist(),t_delay)
+    # traj.add_point_p(q_start.tolist(),t_delay)
 
 
-    T = 2
+    T = 1.7
     N = 200*T
     dt = float(T)/(N-1)
-    vy = .3
-    vz = .15
-    jerk = 0
-    thList = linearSpace(False, T, N, vy, vz, jerk)
+    vy = .8
+    vz = .4
+    jerk = -2
+
+    plt.close('all')
+
+    thList = linearSpace(True, T, N, vy, vz, jerk)
+    thList = thList[1:,:]
     vList = np.diff(thList,axis=0)/dt
     vList = np.vstack((np.array([0,0,0,0,0,0,0]),vList))
     aList = np.diff(vList,axis=0)/dt
     aList = np.vstack((np.array([0,0,0,0,0,0,0]),aList))
     t_all = np.linspace(0 + t_delay,2*T + t_delay, N*2);
 
-    # plt.close('all')
-    # plt.figure()
-    # plt.plot(thList)
-    # plt.show(block=False)
-    # plt.figure()
-    # plt.plot(vList)
-    # plt.show(block=False)
-    # plt.figure()
-    # plt.plot(aList)
-    # plt.show(block=False)
+    plt.figure()
+    plt.plot(thList)
+    plt.title('Position (joint)')
+    plt.show(block=False)
+    plt.figure()
+    plt.title('Velocity (joint)')
+    plt.plot(vList)
+    plt.show(block=False)
+    plt.figure()
+    plt.title('Acceleration (joint)')
+    plt.plot(aList)
+    plt.show(block=False)
+
+    traj.add_point_p(thList[0,:].tolist(),t_delay)
+
 
     for i in range(int(2*N)-1):
         # traj.add_point(jP_all[:,i].tolist(), jV_all[:,i].tolist(), jA_all[:,i].tolist(),t_all[i])

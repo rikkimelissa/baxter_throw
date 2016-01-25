@@ -73,12 +73,20 @@ def linearSpace(plot, T,  N, vy, vz, jerk):
     for ind in range(len(q0)):
         q0[ind] = current_angles[ind]
 
-    q_start = np.array([0.2339320701525256,  -0.5878981369570848,  0.19903400722813244,  1.8561167533413507,
- -0.4908738521233324,  -0.97752925707998,  -0.49547579448698864])
-    q_throw = np.array([0.9265243958827899,  -0.7827136970185323,  -0.095490304045867,  1.8338740319170121,
-     -0.03681553890924993,  -0.9909515889739773,  -0.5840631849873713])
-    q_end = np.array([0.9085001216251363,  -1.0089758632316308, 0.07401457301547121, 1.8768254939778037,
-     0.18599517053110642, -0.8172282647459542, -0.44600491407768406])
+ #    q_start = np.array([0.2339320701525256,  -0.5878981369570848,  0.19903400722813244,  1.8561167533413507,
+ # -0.4908738521233324,  -0.97752925707998,  -0.49547579448698864])
+ #    q_throw = np.array([0.9265243958827899,  -0.7827136970185323,  -0.095490304045867,  1.8338740319170121,
+ #     -0.03681553890924993,  -0.9909515889739773,  -0.5840631849873713])
+ #    q_end = np.array([0.9085001216251363,  -1.0089758632316308, 0.07401457301547121, 1.8768254939778037,
+ #     0.18599517053110642, -0.8172282647459542, -0.44600491407768406])
+
+    q_throw = np.array([ 0.47668453, -0.77274282,  0.93150983,  2.08352941,  0.54149522,
+       -1.26745163, -2.06742261])
+    q_end = np.array([ 0.75356806, -0.89162633,  0.54648066,  2.08698086,  0.41033986,
+       -1.18423317, -1.15815549])
+    q_start = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
+       -1.16889336, -0.90888362])
+
     X_start = np.asarray(kdl_kin.forward(q_start))
     X_throw = np.asarray(kdl_kin.forward(q_throw))
     X_end = np.asarray(kdl_kin.forward(q_end))
@@ -118,7 +126,7 @@ def linearSpace(plot, T,  N, vy, vz, jerk):
         j1Pa = jointPath(tSpace,coeff)
         j1Va = jointVelocity(tSpace,coeff)
         j1Aa = jointAcceleration(tSpace,coeff)
-        b = np.array([X_throw[i,3],X_end[i,3],vEnd[3+i],0,0,0,jEnd[i+3],jStart[i+3]])
+        b = np.array([X_throw[i,3],X_end[i,3],0,0,0,0,jEnd[i+3],jStart[i+3]])
         coeff = np.linalg.solve(a,b)
         j1Pb = jointPath(tSpace,coeff)
         j1Vb = jointVelocity(tSpace,coeff)
@@ -132,17 +140,19 @@ def linearSpace(plot, T,  N, vy, vz, jerk):
 
     if plot == True:
         plt.figure()
+        plt.title('Position (cartesian)')
         plt.plot(np.hstack((pLista,pListb)).transpose())
         plt.figure()
+        plt.title('Velocity (cartesian)')
         plt.plot(np.hstack((vLista,vListb)).transpose())
         plt.figure()
+        plt.title('Acceleration (cartesian)')
         plt.plot(np.hstack((aLista,aListb)).transpose())
-
         plt.show(block=False)
 
     Xlista = np.empty((N,4,4))
     Xlistb = np.empty((N,4,4))
-    Re, pe = TransToRp(X_start)
+    Re, pe = TransToRp(X_throw)
     i=0
     for t in tSpace[0:]:
         pa = pLista[:,i]
