@@ -62,6 +62,17 @@ def jointJerk(t,coeff):
     return j
 
 def linearSpace():
+
+    robot = URDF.from_parameter_server()
+    base_link = robot.get_root()
+    kdl_kin = KDLKinematics(robot, base_link, 'right_gripper_base')
+    # Create seed with current position
+    q0 = kdl_kin.random_joint_angles()
+    limb_interface = baxter_interface.limb.Limb('right')
+    current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
+    for ind in range(len(q0)):
+        q0[ind] = current_angles[ind]
+
     q_start = np.array([0.2339320701525256,  -0.5878981369570848,  0.19903400722813244,  1.8561167533413507,
  -0.4908738521233324,  -0.97752925707998,  -0.49547579448698864])
     q_throw = np.array([0.9265243958827899,  -0.7827136970185323,  -0.095490304045867,  1.8338740319170121,
@@ -73,8 +84,6 @@ def linearSpace():
     X_end = np.asarray(kdl_kin.forward(q_end))
     Vb = np.array([0,0,0,0,1,2])
 
-    T=2;
-    N=100;
     xStart = X_start
     xEnd = X_throw
     vStart = np.array([0,0,0,0,0,0])
@@ -82,44 +91,117 @@ def linearSpace():
     aStart = np.array([0,0,0,0,0,0])
     aEnd = np.array([0,0,0,0,0,0])
     jStart = np.array([0,0,0,0,0,0])
-    jEnd = np.array([0,0,0,0,0,-2])
-    cartesianPath(xStart, xEnd, vStart, vEnd, aStart, aEnd, jStart, jEnd, T, N)
+    jEnd = np.array([0,0,0,0,0,0])
+
+    T = .7
+    N = 200*T
+    a = np.array([[1,0,0,0,0,0,0,0],[1,T,T**2,T**3,T**4,T**5,T**6,T**7],[0,1,0,0,0,0,0,0],[0,1,2*T,3*T**2,4*T**3,5*T**4,6*T**5,7*T**6],
+        [0,0,2,0,0,0,0,0],[0,0,2,6*T,12*T**2,20*T**3,30*T**4,42*T**5],[0,0,0,6,0,0,0,0],[0,0,0,6,24*T,60*T**2,120*T**3,210*T**4]])
+    tSpace = np.linspace(0,T,N);
+    tOffset = T
+    colors = ['r','b','c','y','m','oc','k']
+
+    # plt.close('all')
+    
+    pLista = np.empty((3,N))
+    pListb = np.empty((3,N))
+    vLista = np.empty((3,N))
+    vListb = np.empty((3,N))
+    aLista = np.empty((3,N))
+    aListb = np.empty((3,N))
 
     for i in range(3):
 
-        b = np.array([X_start[i,3],X_throw[i,3],0,vEnd[3+i],0,0,jStart[i],jEnd[i]])
+        b = np.array([X_start[i,3],X_throw[i,3],0,vEnd[3+i],0,0,jStart[i+3],jEnd[i+3]])
         coeff = np.linalg.solve(a,b)
         j1Pa = jointPath(tSpace,coeff)
         j1Va = jointVelocity(tSpace,coeff)
         j1Aa = jointAcceleration(tSpace,coeff)
-        b = np.array([X_throw[i,3],X_end[i,3],vEnd[3+i],0,0,0,jEnd[i],jStart[i]])
+        b = np.array([X_throw[i,3],X_end[i,3],vEnd[3+i],0,0,0,jEnd[i+3],jStart[i+3]])
         coeff = np.linalg.solve(a,b)
         j1Pb = jointPath(tSpace,coeff)
         j1Vb = jointVelocity(tSpace,coeff)
         j1Ab = jointAcceleration(tSpace,coeff)
+        pLista[i,:] = j1Pa
+        pListb[i,:] = j1Pb
+        vLista[i,:] = j1Va
+        vListb[i,:] = j1Vb
+        aLista[i,:] = j1Aa
+        aListb[i,:] = j1Ab
 
-        color = colors[i]
-        plt.figure(1)
-        plt.hold(True)
-        plt.plot(tSpace,j1Pa,'-'+color,label='Joint '+str(i))
-        plt.plot(tSpace+tOffset,j1Pb,'--'+color)
-        plt.title('Path')
-        plt.legend(loc='upper left')
-        # plt.show(block = False)
+    # plt.figure()
+    # plt.plot(np.hstack((pLista,pListb)).transpose())
+    # plt.figure()
+    # plt.plot(np.hstack((vLista,vListb)).transpose())
+    # plt.figure()
+    # plt.plot(np.hstack((aLista,aListb)).transpose())
 
-        plt.figure(2)
-        plt.plot(tSpace,j1Va,'-'+color,label='Joint '+str(i))
-        plt.plot(tSpace+tOffset,j1Vb,'--'+color)
-        plt.title('Velocity')
-        plt.legend(loc='upper left')
-        # plt.show(block = False)
+    # plt.show(block=False)
 
-        plt.figure(3)
-        plt.hold(True)
-        plt.plot(tSpace,j1Aa,'-'+color,label='Joint '+str(i))
-        plt.plot(tSpace+tOffset,j1Ab,'--'+color)
-        plt.title('Acceleration')
-        plt.legend(loc='upper left')
+    Xlista = np.empty((N,4,4))
+    Xlistb = np.empty((N,4,4))
+    Re, pe = TransToRp(X_start)
+    i=0
+    for t in tSpace[0:]:
+        pa = pLista[:,i]
+        Ra = Re
+        Xlista[i] = RpToTrans(Ra,pa)
+        pb = pListb[:,i]
+        Rb = Re
+        Xlistb[i] = RpToTrans(Rb,pb)
+        i = i + 1
+
+    XlistT = np.vstack((Xlista,Xlistb))
+
+    q0 = kdl_kin.random_joint_angles()
+    current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
+    for ind in range(len(q0)):
+        q0[ind] = q_start[ind]
+
+    thList = np.empty((N,7))
+    thList[0] = q0;
+    
+    for i in range(int(N)-1):
+    # Solve for joint angles
+        seed = 0
+        q_ik = kdl_kin.inverse(XlistT[i+1], thList[i])
+        while q_ik == None:
+            seed += 0.03
+            q_ik = kdl_kin.inverse(XlistT[i+1], thList[i]+seed)
+            if (seed>1):
+                q_ik = thList[i]
+                break
+        thList[i+1] = q_ik
+
+    return thList
+
+    # plt.figure()
+    # plt.plot(thList)
+    # plt.show(block=False)
+
+def ex2():
+    color = colors[i]
+    plt.figure(1)
+    plt.hold(True)
+    plt.plot(tSpace,j1Pa,'-'+color,label='Joint '+str(i))
+    plt.plot(tSpace+tOffset,j1Pb,'--'+color)
+    plt.title('Path')
+    plt.legend(loc='upper left')
+    plt.show(block = False)
+
+    plt.figure(2)
+    plt.plot(tSpace,j1Va,'-'+color,label='Joint '+str(i))
+    plt.plot(tSpace+tOffset,j1Vb,'--'+color)
+    plt.title('Velocity')
+    plt.legend(loc='upper left')
+    # plt.show(block = False)
+
+    plt.figure(3)
+    plt.hold(True)
+    plt.plot(tSpace,j1Aa,'-'+color,label='Joint '+str(i))
+    plt.plot(tSpace+tOffset,j1Ab,'--'+color)
+    plt.title('Acceleration')
+    plt.legend(loc='upper left')
 
         # plt.show(block = False)
 
