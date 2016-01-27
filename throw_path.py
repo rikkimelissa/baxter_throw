@@ -28,7 +28,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 """
-Baxter RSDK Joint Trajectory Action Client Example
+Baxter JTAS throw_path
 """
 import argparse
 import sys
@@ -177,33 +177,33 @@ def main():
     vz = .4
     jerk = -2
 
-    plt.close('all')
+    # plt.close('all')
 
-    thList = linearSpace(True, T, N, vy, vz, jerk)
-    thList = thList[1:,:]
+    thList, vList = linearSpace(False, T, N, vy, vz, jerk)
+    # thList = thList[1:,:]
     vList = np.diff(thList,axis=0)/dt
     vList = np.vstack((np.array([0,0,0,0,0,0,0]),vList))
     aList = np.diff(vList,axis=0)/dt
     aList = np.vstack((np.array([0,0,0,0,0,0,0]),aList))
     t_all = np.linspace(0 + t_delay,2*T + t_delay, N*2);
 
-    plt.figure()
-    plt.plot(thList)
-    plt.title('Position (joint)')
-    plt.show(block=False)
-    plt.figure()
-    plt.title('Velocity (joint)')
-    plt.plot(vList)
-    plt.show(block=False)
-    plt.figure()
-    plt.title('Acceleration (joint)')
-    plt.plot(aList)
-    plt.show(block=False)
+    # plt.figure()
+    # plt.plot(thList)
+    # plt.title('Position (joint)')
+    # plt.show(block=False)
+    # plt.figure()
+    # plt.title('Velocity (joint)')
+    # plt.plot(vList)
+    # plt.show(block=False)
+    # plt.figure()
+    # plt.title('Acceleration (joint)')
+    # plt.plot(aList)
+    # plt.show(block=False)
 
     traj.add_point_p(thList[0,:].tolist(),t_delay)
 
 
-    for i in range(int(2*N)-1):
+    for i in range(int(2*N)-2):
         # traj.add_point(jP_all[:,i].tolist(), jV_all[:,i].tolist(), jA_all[:,i].tolist(),t_all[i])
         traj.add_point(thList[i,:].tolist(), vList[i,:].tolist(), aList[i,:].tolist(),t_all[i])
     # p2 = positionS[limb]

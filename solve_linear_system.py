@@ -127,6 +127,7 @@ def linearSpace(plot, T,  N, vy, vz, jerk):
         j1Va = jointVelocity(tSpace,coeff)
         j1Aa = jointAcceleration(tSpace,coeff)
         b = np.array([X_throw[i,3],X_end[i,3],0,0,0,0,jEnd[i+3],jStart[i+3]])
+        # b = np.array([X_throw[i,3],X_end[i,3],vEnd[3+i],0,0,0,jEnd[i+3],jStart[i+3]])
         coeff = np.linalg.solve(a,b)
         j1Pb = jointPath(tSpace,coeff)
         j1Vb = jointVelocity(tSpace,coeff)
@@ -138,6 +139,8 @@ def linearSpace(plot, T,  N, vy, vz, jerk):
         aLista[i,:] = j1Aa
         aListb[i,:] = j1Ab
 
+    vList = np.hstack((vLista,vListb)).transpose()
+    dt = float(T)/(N-1)
     if plot == True:
         plt.figure()
         plt.title('Position (cartesian)')
@@ -145,6 +148,10 @@ def linearSpace(plot, T,  N, vy, vz, jerk):
         plt.figure()
         plt.title('Velocity (cartesian)')
         plt.plot(np.hstack((vLista,vListb)).transpose())
+        # plt.figure()
+        # plt.title('Acceleration dt')
+        # aList = np.diff(vList,axis=0)/dt
+        # plt.plot(aList)
         plt.figure()
         plt.title('Acceleration (cartesian)')
         plt.plot(np.hstack((aLista,aListb)).transpose())
@@ -185,12 +192,41 @@ def linearSpace(plot, T,  N, vy, vz, jerk):
                 break
         thList[i+1] = q_ik
 
-    if plot == True:
+    thList = thList[1:,:]
+    # if plot == True:
+    #     plt.figure()
+    #     plt.plot(thList)
+    #     plt.show(block=False)
+
+    jList = np.empty((thList.shape[0],7))
+    # Compare jacobian velocities to joint velocities
+    for i in range(thList.shape[0]):
+        jacobian = kdl_kin.jacobian(thList[i])
+        inv_jac = np.linalg.pinv(jacobian)
+        Vb = np.hstack((np.array([0,0,0]), vList[i]))
+        q_dot_throw = inv_jac.dot(Vb)
+        jList[i,:] = q_dot_throw
+
+    # plt.figure()
+    # plt.title('Jacobian-based joint velocities')
+    # plt.plot(jList);
+    # plt.show(block = False)
+
+    vList = np.diff(thList,axis=0)/dt
+    vList = np.vstack((np.array([0,0,0,0,0,0,0]),vList))
+    vCarlist = np.empty((thList.shape[0],6))
+    for i in range(thList.shape[0]):
+        jacobian = kdl_kin.jacobian(thList[i])
+        vCar = jacobian.dot(vList[i]);
+        vCarlist[i,:] = vCar;
+
+    if (plot==True):
         plt.figure()
-        plt.plot(thList)
+        plt.title('Jacobian based cartesian velocities')
+        plt.plot(vList[:,3:6])
         plt.show(block=False)
 
-    return thList
+    return (thList, jList)
 
 def ex2():
     color = colors[i]
