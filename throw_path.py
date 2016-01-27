@@ -171,18 +171,18 @@ def main():
 
 
     T = 1.7
-    N = 200*T
+    N = 50*T
     dt = float(T)/(N-1)
-    vy = .8
-    vz = .4
-    jerk = -2
+    vy = .8 # nominal .8
+    vz = .4 # nominal .4
+    jerk = -5
 
     # plt.close('all')
 
     thList, vList = linearSpace(False, T, N, vy, vz, jerk)
     # thList = thList[1:,:]
-    vList = np.diff(thList,axis=0)/dt
-    vList = np.vstack((np.array([0,0,0,0,0,0,0]),vList))
+    # vList = np.diff(thList,axis=0)/dt
+    # vList = np.vstack((np.array([0,0,0,0,0,0,0]),vList))
     aList = np.diff(vList,axis=0)/dt
     aList = np.vstack((np.array([0,0,0,0,0,0,0]),aList))
     t_all = np.linspace(0 + t_delay,2*T + t_delay, N*2);
@@ -202,21 +202,10 @@ def main():
 
     traj.add_point_p(thList[0,:].tolist(),t_delay)
 
-
     for i in range(int(2*N)-2):
-        # traj.add_point(jP_all[:,i].tolist(), jV_all[:,i].tolist(), jA_all[:,i].tolist(),t_all[i])
         traj.add_point(thList[i,:].tolist(), vList[i,:].tolist(), aList[i,:].tolist(),t_all[i])
-    # p2 = positionS[limb]
-    # p3 = positionT[limb]
-    # p4 = positionE[limb]
-    # traj.add_point_p(p2, 3.0)
-    # traj.add_point(p3, velT[limb], 4)
-    # traj.add_point_p(p3, 4.0)
-    # traj.add_point_p(p4, 5)
-    # for i in range(100):
-    #     traj.add_point(path1[i,:], vel1[i,:], acc1[i,:], 3 + tSpace1[i])
-    # for i in range(100):
-    #     traj.add_point(path2[i,:], vel2[i,:], acc2[i,:], 3 + T1 + tSpace2[i])
+        # traj.add_point_p(thList[i,:].tolist(), t_all[i])
+
     traj.start()
     traj.wait(30.0)
     print("Exiting - Joint Trajectory Action Test Complete")

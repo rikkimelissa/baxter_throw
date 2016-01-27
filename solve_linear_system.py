@@ -89,11 +89,16 @@ def linearSpace(plot, T,  N, vy, vz, jerk):
 
     X_start = np.asarray(kdl_kin.forward(q_start))
     X_throw = np.asarray(kdl_kin.forward(q_throw))
+
+    # offset throw position
+    X_throw[0,3] += 0
+    X_throw[1,3] += 0
+    X_throw[2,3] += 0
     X_end = np.asarray(kdl_kin.forward(q_end))
     Vb = np.array([0,0,0,0,vy,vz])
 
-    xStart = X_start
-    xEnd = X_throw
+    # xStart = X_start
+    # xEnd = X_throw
     vStart = np.array([0,0,0,0,0,0])
     vEnd = Vb
     aStart = np.array([0,0,0,0,0,0])
