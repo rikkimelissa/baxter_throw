@@ -1,0 +1,20 @@
+- Rosbag position/velocity/reference/actual and compare
+
+
+- What is going on with Jacobian? Trajectory is the same even though the velocities are different?
+
+- Velocity may not matter?
+- Confirmed that does not work as well with just 4 p/v/a (beg, throw-, throw+, end)
+- Performance the same when commanded with N = 200 with just position (no vel, acc)
+- Noticed performance degradation at N = 10, with or without velocity/acceleration
+
+- Can change end position in all 3 dimensions (though not much in x) and still achieve throw, can change end velocity within limits and still achieve throw
+
+/robot/left_joint_position_controller/joints/left_e1_controller/state
+/robot/left_joint_velocity_controller/joints/left_w0_controller/state
+/robot/left_joint_velocity_controller/joints/left_w1_controller/command
+/robot/limb/left/endpoint_state
+/robot/limb/left/joint_command
+
+rostopic echo /robot/limb/right/endpoint_state/pose/position
+

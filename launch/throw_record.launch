@@ -1,0 +1,10 @@
+<launch>
+
+    <node name="throwing" pkg="baxter_throw" type="throw_path.py" output="screen" args="-l right"/>  
+
+    <node name="recorder1" pkg="baxter_throw" type="recorder1.sh" />
+    <node name="recorder2" pkg="baxter_throw" type="recorder2.sh" />
+    <node name="recorder3" pkg="baxter_throw" type="recorder3.sh" />
+    <node name="recorder4" pkg="baxter_throw" type="recorder4.sh" />
+
+</launch>
