@@ -2,8 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy import loadtxt
 from solve_linear_system import linearSpace
+import rospy
 
-f = open("pos_actual1.txt", "r")
+rospy.init_node('test')
+
+num = 8
+s = "pos_actual" + str(num) + ".txt"
+f = open(s, "r")
 
 lines=f.readlines()
 posListAct = np.empty((len(lines)/2,7))
@@ -12,7 +17,8 @@ for i in range(len(lines)/2):
     pos = eval(lines[2*i]);
     posListAct[i,:] = pos
 
-f = open("pos_desired1.txt", "r")
+s = "pos_desired" + str(num) + ".txt"
+f = open(s, "r")
 
 lines=f.readlines()
 posListDes = np.empty((len(lines)/2,7))
@@ -21,16 +27,8 @@ for i in range(len(lines)/2):
     pos = eval(lines[2*i]);
     posListDes[i,:] = pos
 
-f = open("pos_desired1.txt", "r")
-
-lines=f.readlines()
-posListDes = np.empty((len(lines)/2,7))
-
-for i in range(len(lines)/2):
-    pos = eval(lines[2*i]);
-    posListDes[i,:] = pos
-
-f = open("time1.txt", "r")
+s = "time" + str(num) + ".txt"
+f = open(s, "r")
 lines = f.readlines()
 timeList = np.empty((len(lines)/4,7))
 
@@ -59,12 +57,28 @@ fig.patch.set_facecolor('white')
 l0 = plt.plot(t_all[2:],thList,'r-')
 l1 = plt.plot(timeList, posListAct,'b--',label = 'Actual')
 l2 = plt.plot(timeList, posListDes,'g-.',label = 'Desired')
-plt.legend([l0[0], l1[0], l2[0]],["Calculated", "Commanded", "Actual"],loc=2)
+plt.legend([l0[0], l2[0], l1[0]],["Calculated", "Commanded", "Actual"],loc=2)
 plt.axis([5,8.5, -2, 2.5])
 plt.title('Positions for 7 DOF')
 plt.xlabel('Angle (rad)')
 plt.ylabel('Time (sec)')
 plt.show(block=False)
 
-
-
+# print(np.diff(timeList,axis=0))
+dtP = .01;
+vList1 = np.diff(thList,axis=0)/dt
+vList1 = np.vstack((np.array([0,0,0,0,0,0,0]),vList1))
+vList2 = np.diff(posListAct,axis=0)/dtP
+vList2 = np.vstack((np.array([0,0,0,0,0,0,0]),vList2))
+vList3 = np.diff(posListDes,axis=0)/dtP
+vList3 = np.vstack((np.array([0,0,0,0,0,0,0]),vList3))
+fig = plt.figure()
+fig.patch.set_facecolor('white')
+l0 = plt.plot(t_all[2:],vList1,'-')
+l1 = plt.plot(timeList, vList2,'--',label = 'Actual')
+l2 = plt.plot(timeList, vList3,'-.',label = 'Desired')
+plt.legend([l0[0], l2[0], l1[0]],["Calculated", "Commanded", "Actual"],loc=2)
+plt.axis([5,8.5, -2, 2.5])
+plt.title('Velocities for 7 DOF')
+plt.ylabel('Time (sec)')
+plt.show(block=False)

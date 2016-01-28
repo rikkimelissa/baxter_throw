@@ -1,6 +1,3 @@
-- Rosbag position/velocity/reference/actual and compare
-
-
 - What is going on with Jacobian? Trajectory is the same even though the velocities are different?
 
 - Velocity may not matter?
@@ -10,11 +7,25 @@
 
 - Can change end position in all 3 dimensions (though not much in x) and still achieve throw, can change end velocity within limits and still achieve throw
 
-/robot/left_joint_position_controller/joints/left_e1_controller/state
-/robot/left_joint_velocity_controller/joints/left_w0_controller/state
-/robot/left_joint_velocity_controller/joints/left_w1_controller/command
-/robot/limb/left/endpoint_state
-/robot/limb/left/joint_command
+To generate comparison plot:
+- roslaunch baxter_throw throw_record.launch
+- rename 's/1.txt/2.txt/' *.txt
+- change variable in parser
+- rosrun baxter_throw parse_text.py
 
-rostopic echo /robot/limb/right/endpoint_state/pose/position
+
+
+
+
+/robot/right_joint_position_controller/joints/right_e1_controller/state
+/robot/right_joint_velocity_controller/joints/right_w0_controller/state
+/robot/right_joint_velocity_controller/joints/right_w1_controller/command
+/robot/limb/right/endpoint_state
+/robot/limb/right/joint_command
+
+/robot/limb/right/endpoint_state/pose/position
+/robot/limb/right/follow_joint_trajectory/feedback
+
+name: ['head_pan', 'l_gripper_l_finger_joint', 'l_gripper_r_finger_joint', 'left_e0', 'left_e1', 'left_s0', 'left_s1', 'left_w0', 'left_w1', 'left_w2', 'r_gripper_l_finger_joint', 'r_gripper_r_finger_joint', 'right_e0', 'right_e1', 'right_s0', 'right_s1', 'right_w0', 'right_w1', 'right_w2']
+
 

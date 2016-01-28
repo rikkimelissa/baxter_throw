@@ -171,7 +171,7 @@ def main():
 
 
     T = 1.7
-    N = 50*T
+    N = 20*T
     dt = float(T)/(N-1)
     vy = .8 # nominal .8
     vz = .4 # nominal .4
@@ -203,8 +203,8 @@ def main():
     traj.add_point_p(thList[0,:].tolist(),t_delay)
 
     for i in range(int(2*N)-2):
-        traj.add_point(thList[i,:].tolist(), vList[i,:].tolist(), aList[i,:].tolist(),t_all[i])
-        # traj.add_point_p(thList[i,:].tolist(), t_all[i])
+        # traj.add_point(thList[i,:].tolist(), vList[i,:].tolist(), aList[i,:].tolist(),t_all[i])
+        traj.add_point_p(thList[i,:].tolist(), t_all[i])
 
     traj.start()
     traj.wait(30.0)
