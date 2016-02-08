@@ -2,6 +2,7 @@
 
 from math import sqrt, cos, sin, tan, atan, pi, atan2
 from random import random
+import matplotlib.pyplot as plt
 
 # Define range and static variables
 x_range = [.6,.8] # near x position of catcher
@@ -29,12 +30,35 @@ dy = catch_y - throw_y - block_width
 dz = catch_z + cup_height - throw_z - block_height
 
 def plot_results():
-    res = test_pos(catch_x, catch_y, catch_z)
-    while res == None:
+    throw_x_list = [None]*100
+    throw_y_list = [None]*100
+    throw_z_list = [None]*100
+    vel_list = [None]*100
+    alpha_list = [None]*100
+    for i in range(100):
         res = test_pos(catch_x, catch_y, catch_z)
-    throw_x = res[0]; throw_y = res[1]; throw_z = res[2]; vel = res[3]; alpha = res[4]
-    print "x = " + str(throw_x) + "  y = " + str(throw_y) + "  z = " + str(throw_z)
-    print "vel = " + str(vel) + "     alpha = " + str(alpha)
+        while res == None:
+            res = test_pos(catch_x, catch_y, catch_z)
+        throw_x = res[0]; throw_y = res[1]; throw_z = res[2]; vel = res[3]; alpha = res[4]
+        throw_x_list[i] = throw_x;
+        throw_y_list[i] = throw_y;
+        throw_z_list[i] = throw_z;
+        vel_list[i] = vel;
+        alpha_list[i] = alpha;
+    N = 100
+    ind = range(N)
+    width = 1
+    fig, ax = plt.subplots()
+    rect1 = ax.bar(ind,throw_x_list, width, color = 'r')
+    # rect2 = ax.bar([x + y for x, y in zip(ind, [width]*100)],throw_y_list, width, color = 'r')
+    rect2 = ax.bar([x+100 for x in ind],throw_y_list, width, color = 'y')
+    rect3 = ax.bar([x+200 for x in ind],throw_z_list, width, color = 'g')
+    rect4 = ax.bar([x+300 for x in ind],vel_list, width, color = 'b')
+    rect5 = ax.bar([x+400 for x in ind],alpha_list, width, color = 'c')
+    plt.show(block=False)
+
+    # print "x = " + str(throw_x) + "  y = " + str(throw_y) + "  z = " + str(throw_z)
+    # print "vel = " + str(vel) + "     alpha = " + str(alpha)
 
 def test_pos(catch_x, catch_y, catch_z):
     # rand = random()
