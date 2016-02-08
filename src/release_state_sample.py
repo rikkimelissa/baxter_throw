@@ -49,12 +49,11 @@ def plot_results():
     ind = range(N)
     width = 1
     fig, ax = plt.subplots()
-    rect1 = ax.bar(ind,throw_x_list, width, color = 'r')
     # rect2 = ax.bar([x + y for x, y in zip(ind, [width]*100)],throw_y_list, width, color = 'r')
-    rect2 = ax.bar([x+100 for x in ind],throw_y_list, width, color = 'y')
-    rect3 = ax.bar([x+200 for x in ind],throw_z_list, width, color = 'g')
-    rect4 = ax.bar([x+300 for x in ind],vel_list, width, color = 'b')
-    rect5 = ax.bar([x+400 for x in ind],alpha_list, width, color = 'c')
+    rect2 = ax.bar([x for x in ind],throw_y_list, width, color = 'y')
+    rect3 = ax.bar([x+100 for x in ind],throw_z_list, width, color = 'g')
+    rect4 = ax.bar([x+200 for x in ind],vel_list, width, color = 'b')
+    rect5 = ax.bar([x+300 for x in ind],alpha_list, width, color = 'c')
     plt.show(block=False)
 
     # print "x = " + str(throw_x) + "  y = " + str(throw_y) + "  z = " + str(throw_z)
@@ -72,7 +71,7 @@ def test_pos(catch_x, catch_y, catch_z):
     rand = random()
     if find_velocity_param(dx, dy, dz, rand):
         vel, alpha = find_velocity_param(dx, dy, dz, rand)
-        return [throw_x, throw_y, throw_z, vel, alpha]
+        return [throw_y, throw_z, vel, alpha]
 
 def find_velocity_param(dx,dy,dz, rand):
     alpha_min = atan2(dz,dy)
