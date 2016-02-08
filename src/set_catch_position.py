@@ -15,17 +15,12 @@ from functions import JointTrajectory
 def main():
 
     q_set = np.array([-.3048, -.2703, -.1848, 1.908, .758, -1.234, -3.04]) 
-
-    # robot = URDF.from_parameter_server()
-    # base_link = robot.get_root()
-    # kdl_kin = KDLKinematics(robot, base_link, 'left_gripper_base')
-    # q0 = kdl_kin.random_joint_angles()
+    # q_set = np.array([ 0.47668453, -0.77274282,  0.93150983,  2.08352941,  0.54149522,
+    #    -1.26745163, -2.06742261])
 
     rospy.init_node('set_catch_position')
+    # limb_interface = baxter_interface.limb.Limb('right')
     limb_interface = baxter_interface.limb.Limb('left')
-    # current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
-    # for ind in range(len(q0)):
-    #     q0[ind] = q_set[ind]
 
     angles = limb_interface.joint_angles()
 

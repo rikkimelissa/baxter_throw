@@ -154,9 +154,9 @@ def linearSpace(plot, T,  N, vy, vz, jerk):
         plt.title('Velocity (cartesian)')
         plt.plot(np.hstack((vLista,vListb)).transpose())
         # plt.figure()
-        # plt.title('Acceleration dt')
-        # aList = np.diff(vList,axis=0)/dt
-        # plt.plot(aList)
+        # plt.title('Velocity dt')
+        # vList = np.diff(pLista)/dt
+        # plt.plot(vList.transpose())
         plt.figure()
         plt.title('Acceleration (cartesian)')
         plt.plot(np.hstack((aLista,aListb)).transpose())
@@ -228,7 +228,13 @@ def linearSpace(plot, T,  N, vy, vz, jerk):
     if (plot==True):
         plt.figure()
         plt.title('Jacobian based cartesian velocities')
-        plt.plot(vList[:,3:6])
+        plt.plot(vCarlist[:,0:3])
+        plt.show(block=False)
+
+    if (plot==True):
+        plt.figure()
+        plt.title('Joint velocities')
+        plt.plot(vList)
         plt.show(block=False)
 
     return (thList, jList)

@@ -4,10 +4,12 @@ from numpy import loadtxt
 from solve_linear_system import linearSpace
 import rospy
 
-rospy.init_node('test')
+# rospy.init_node('test')
 
-num = 8
-s = "pos_actual" + str(num) + ".txt"
+#ind = 661
+
+num = 1
+s = "data/pos_actual" + str(num) + ".txt"
 f = open(s, "r")
 
 lines=f.readlines()
@@ -17,7 +19,7 @@ for i in range(len(lines)/2):
     pos = eval(lines[2*i]);
     posListAct[i,:] = pos
 
-s = "pos_desired" + str(num) + ".txt"
+s = "data/pos_desired" + str(num) + ".txt"
 f = open(s, "r")
 
 lines=f.readlines()
@@ -27,7 +29,7 @@ for i in range(len(lines)/2):
     pos = eval(lines[2*i]);
     posListDes[i,:] = pos
 
-s = "time" + str(num) + ".txt"
+s = "data/time" + str(num) + ".txt"
 f = open(s, "r")
 lines = f.readlines()
 timeList = np.empty((len(lines)/4,7))
@@ -50,8 +52,9 @@ thList, vList = linearSpace(False, T, N, vy, vz, jerk)
 t_delay = 5.0
 t_all = np.linspace(0 + t_delay,2*T + t_delay, N*2);
 
+dTime = .01
 
-plt.close('all')
+# plt.close('all')
 fig = plt.figure()
 fig.patch.set_facecolor('white')
 l0 = plt.plot(t_all[2:],thList,'r-')

@@ -122,16 +122,16 @@ def main():
     command a short series of trajectory points for the arm
     to follow.
     """
-    arg_fmt = argparse.RawDescriptionHelpFormatter
-    parser = argparse.ArgumentParser(formatter_class=arg_fmt,
-                                     description=main.__doc__)
-    required = parser.add_argument_group('required arguments')
-    required.add_argument(
-        '-l', '--limb', required=True, choices=['left', 'right'],
-        help='send joint trajectory to which limb'
-    )
-    args = parser.parse_args(rospy.myargv()[1:])
-    limb = args.limb
+    # arg_fmt = argparse.RawDescriptionHelpFormatter
+    # parser = argparse.ArgumentParser(formatter_class=arg_fmt,
+    #                                  description=main.__doc__)
+    # required = parser.add_argument_group('required arguments')
+    # required.add_argument(
+    #     '-l', '--limb', required=True, choices=['left', 'right'],
+    #     help='send joint trajectory to which limb'
+    # )
+    # args = parser.parse_args(rospy.myargv()[1:])
+    limb = 'right'
 
     print("Initializing node... ")
     rospy.init_node("throwing")
@@ -163,7 +163,15 @@ def main():
     traj = Trajectory(limb)
     rospy.on_shutdown(traj.stop)
     # Command Current Joint Positions first
-    limb_interface = baxter_interface.limb.Limb(limb)
+    limb_interface = baxter_interface.limb.Limb('right')
+    # gripper = baxter_interface.gripper.Gripper('right')
+    # gripper.calibrate()
+    # # gripper.set_velocity(50)
+    # gripper.close()
+    # gripper.close()
+    # gripper.close()
+    # gripper.close()
+    rospy.sleep(.5)
     current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
     traj.add_point_p(current_angles, 0.0)
     t_delay = 5.0
@@ -171,11 +179,11 @@ def main():
 
 
     T = 1.7
-    N = 20*T
+    N = 50*T
     dt = float(T)/(N-1)
     vy = .8 # nominal .8
     vz = .4 # nominal .4
-    jerk = -5
+    jerk = -20 #nominal -5
 
     # plt.close('all')
 
@@ -203,56 +211,23 @@ def main():
     traj.add_point_p(thList[0,:].tolist(),t_delay)
 
     for i in range(int(2*N)-2):
-        # traj.add_point(thList[i,:].tolist(), vList[i,:].tolist(), aList[i,:].tolist(),t_all[i])
-        traj.add_point_p(thList[i,:].tolist(), t_all[i])
+        traj.add_point(thList[i,:].tolist(), vList[i,:].tolist(), aList[i,:].tolist(),t_all[i])
+        # traj.add_point_p(thList[i,:].tolist(), t_all[i])
 
     traj.start()
+    rospy.sleep(T+t_delay+.005)
+    # gripper.open()
+    # gripper.open()
+    # gripper.open()
+    # gripper.open()
+    # gripper.open()
+
     traj.wait(30.0)
+    traj.clear(limb)
+
+
     print("Exiting - Joint Trajectory Action Test Complete")
 
 
 if __name__ == "__main__":
     main()
-
-
-    # q_start = np.array([0.2339320701525256,  -0.5878981369570848,  0.19903400722813244,  1.8561167533413507,
-    #  -0.4908738521233324,  -0.97752925707998,  -0.49547579448698864])
-    # q_throw = np.array([0.9265243958827899,  -0.7827136970185323,  -0.095490304045867,  1.8338740319170121,
-    #  -0.03681553890924993,  -0.9909515889739773,  -0.5840631849873713])
-    # # q_dot = np.array([-0.23825794, -0.13400971,  0.04931685,  0.0264105 , -0.8301056 , 0.28080345,  0.39270727])
-    # q_dot = np.array([ -0.675,  -0.675,  0.675,  0.675,  -0.9  ,  0.9  ,  0.9  ])
-    # q_end = np.array([0.9085001216251363,  -1.0089758632316308, 0.07401457301547121, 1.8768254939778037,
-    #  0.18599517053110642, -0.8172282647459542, -0.44600491407768406])
-
-
-    # T = 3 # set time scale
-    # N = 200*T # set divisions
-    # tSpace = np.linspace(0,T,N);
-    # jerk = -12
-    # a = np.array([[1,0,0,0,0,0,0,0],[1,T,T**2,T**3,T**4,T**5,T**6,T**7],[0,1,0,0,0,0,0,0],[0,1,2*T,3*T**2,4*T**3,5*T**4,6*T**5,7*T**6],
-    #     [0,0,2,0,0,0,0,0],[0,0,2,6*T,12*T**2,20*T**3,30*T**4,42*T**5],[0,0,0,6,0,0,0,0],[0,0,0,6,24*T,60*T**2,120*T**3,210*T**4]])
-
-    # # Calculate trajectories
-    # for i in range(7):
-    #     b = np.array([q_start[i],q_throw[i],0,q_dot[i],0,.5,0,jerk])
-    #     coeff = np.linalg.solve(a,b)
-    #     jPa = jointPath(tSpace,coeff)
-    #     jVa = jointVelocity(tSpace,coeff)
-    #     jAa = jointAcceleration(tSpace,coeff)
-    #     b = np.array([q_throw[i],q_end[i],q_dot[i],.5,0,0,jerk,0])
-    #     coeff = np.linalg.solve(a,b)
-    #     jPb = jointPath(tSpace,coeff) 
-    #     jVb = jointVelocity(tSpace,coeff)
-    #     jAb = jointAcceleration(tSpace,coeff)
-    #     jP = np.hstack((jPa,jPb))
-    #     jV = np.hstack((jVa,jVb))
-    #     jA = np.hstack((jAa,jAb))
-    #     if i==0:
-    #         jP_all = jP
-    #         jV_all = jV
-    #         jA_all = jA
-    #     else:
-    #         jP_all = np.vstack((jP_all, jP))
-    #         jV_all = np.vstack((jV_all, jV))
-    #         jA_all = np.vstack((jA_all, jA))
-    # t_all = np.linspace(0 + t_delay,2*T + t_delay, N*2);
