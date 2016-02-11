@@ -110,10 +110,4 @@ def run_solver():
     plt.plot(vy,'r')
     plt.show(block=False)
 
-def solve_quad(a,b,c):
-    r1 = (-b + math.sqrt(b**2-4*a*c))/(2*a)
-    r2 = (-b - math.sqrt(b**2-4*a*c))/(2*a)
-    if r1 > 0:
-        return r1
-    elif r2 > 0:
-        return r2
+
