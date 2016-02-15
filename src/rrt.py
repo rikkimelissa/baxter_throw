@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from math import atan2, sin, cos
 
 pos_init = [50,50]
-iter = 100;
+iter = 1000;
 
 tree = np.empty((iter+1,2))
 edges = np.empty((iter+1,2))
@@ -55,4 +55,4 @@ def nearest_neighbor(x, y, tree, nodes):
     return min_node
 
 if __name__ == "__main__":
-    build_tree(100,tree,edges)
+    build_tree(1000,tree,edges)
