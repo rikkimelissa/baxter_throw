@@ -19,6 +19,13 @@ def build_tree(iter, tree, edges):
         # choose_control
         tree = insert_vertex(node,tree,x,y,i)
         edges = insert_edge(edges, node, i)
+        # print x, y, node, tree[0:i+2, :], edges[0:i+1,:]
+        # plt.plot(tree[0:i+2,0],tree[0:i+2,1],'.')
+        # for k in range(i+1):
+        #     plt.plot([tree[edges[k,0]][0],tree[edges[k,1]][0]],[tree[edges[k,0]][1],tree[edges[k,1]][1]])
+        # plt.xlim([20,80])
+        # plt.ylim([20,80])
+        # plt.show(block=False)
 
     plt.close('all')
     plt.figure()
@@ -55,4 +62,4 @@ def nearest_neighbor(x, y, tree, nodes):
     return min_node
 
 if __name__ == "__main__":
-    build_tree(1000,tree,edges)
+    build_tree(iter,tree,edges)
