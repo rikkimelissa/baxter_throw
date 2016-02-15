@@ -5,6 +5,7 @@ from functions import RpToTrans
 import numpy as np
 from urdf_parser_py.urdf import URDF
 from pykdl_utils.kdl_kinematics import KDLKinematics
+from math import sin, cos
 
 catch_x = .68
 catch_z = -.6 # range from - .5 to 0 # lower range determined by baxter
@@ -19,19 +20,12 @@ def find_feasible_release():
 
     while not found:
         X, th_init, throw_y, throw_z, vel, alpha = sample_state()
-        test1, q_ik = test_for_ik(X, th_init, kdl_kin)
-        if test1:
+        ik_test, q_ik = test_for_ik(X, th_init, kdl_kin)
+        if ik_test:
             if test_joint_vel(q_ik, vel, alpha, kdl_kin):
-                found = true
-                print 'Passed'
+                found = True
 
     return throw_y, throw_z, vel, alpha
-
-
-
-
-
-
 
 def sample_state():
     res = test_pos(catch_x, catch_y, catch_z)
@@ -41,7 +35,8 @@ def sample_state():
 
     throw_x = .68;
     throw_pos = np.array([throw_x, throw_y, throw_z])
-    th_init = np.empty(7)
+    th_init = np.array([ 0.47668453, -0.77274282,  0.93150983,  2.08352941,  0.54149522,
+       -1.26745163, -2.06742261]) # experimentally determined
     R_init = np.array([[-0.11121663, -0.14382586,  0.98333361], # experimentally determined
        [-0.95290138,  0.2963578 , -0.06442835],
        [-0.28215212, -0.94418546, -0.17001177]])
@@ -68,9 +63,10 @@ def test_joint_vel(q_ik, vel, alpha, kdl_kin):
     Vb = np.array([0,0,0,0,v_y,v_z])
     q_dot_throw = inv_jac.dot(Vb)
     for i in range(4):
-        if q_dot_throw[i] > 2.0:
+        if q_dot_throw[0,i] > 2.0 or q_dot_throw[0,i] < -2.0:
             return False
     for i in range(3):
-        if q_dot_throw[i+4] > 4.0:
+        if q_dot_throw[0,i+4] > 4.0 or q_dot_throw[0,i+4] < -4.0:
             return False
     return True
+
