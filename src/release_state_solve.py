@@ -12,14 +12,14 @@ catch_z = -.6 # range from - .5 to 0 # lower range determined by baxter
 catch_y = .7 # range from .29 to .5, works after .5 but hard to find solutions
 
 
-def find_feasible_release():
+def find_feasible_release(catch_x, catch_y, catch_z):
     found = False;
     robot = URDF.from_parameter_server()
     base_link = robot.get_root()
     kdl_kin = KDLKinematics(robot, base_link, 'right_gripper_base')
 
     while not found:
-        X, th_init, throw_y, throw_z, vel, alpha = sample_state()
+        X, th_init, throw_y, throw_z, vel, alpha = sample_state(catch_x, catch_y, catch_z)
         ik_test, q_ik = test_for_ik(X, th_init, kdl_kin)
         if ik_test:
             if test_joint_vel(q_ik, vel, alpha, kdl_kin):
@@ -27,7 +27,7 @@ def find_feasible_release():
 
     return throw_y, throw_z, vel, alpha
 
-def sample_state():
+def sample_state(catch_x, catch_y, catch_z):
     res = test_pos(catch_x, catch_y, catch_z)
     while res == None:
         res = test_pos(catch_x, catch_y, catch_z)

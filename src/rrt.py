@@ -3,22 +3,50 @@ from random import random
 import numpy as np
 import matplotlib.pyplot as plt
 from math import atan2, sin, cos
+import time
+from release_state_solve import find_feasible_release
 
-pos_init = [50,50]
+pos_init = [2,2]
+pos_goal = [95,95]
 iter = 1000;
 
-tree = np.empty((iter+1,2))
-edges = np.empty((iter+1,2))
-tree[0] = pos_init
+treeA = np.empty((iter+1,2))
+edgesA = np.empty((iter+1,2))
+treeB = np.empty((iter+1,2))
+edgesB = np.empty((iter+1,2))
+treeA[0] = pos_init
+treeB[0] = pos_goal
 
-def build_tree(iter, tree, edges):
-    for i in range(iter):
+def dynamic_rrt():
+    # catch_x = .68
+    # catch_z = -.6 # range from - .5 to 0 # lower range determined by baxter
+    # catch_y = .7 # range from .29 to .5, works after .5 but hard to find solutions
+    # throw_y, throw_z, vel, alpha = find_feasible_release(catch_x, catch_y, catch_z)
+    # example end point
+    throw_y = .20516
+    throw_z = .3073
+    vel = 1.03
+    alpha = 1.55
+
+def build_tree(iter,treeA, treeB ,edgesA, edgesB):
+    i = 0
+    while i < iter:
         x = random()*100
         y = random()*100
-        node = nearest_neighbor(x,y, tree, i)
+        node = nearest_neighbor(x,y, treeA, i)
         # choose_control
-        tree = insert_vertex(node,tree,x,y,i)
-        edges = insert_edge(edges, node, i)
+        treeA = insert_vertex(node,treeA,x,y,i)
+        edgesA = insert_edge(edgesA, node, i)
+        x = random()*100
+        y = random()*100
+        node = nearest_neighbor(x,y, treeB, i)
+        # choose_control
+        treeB = insert_vertex(node,treeB,x,y,i)
+        edgesB = insert_edge(edgesB, node, i)
+        result = connect_trees(treeA, treeB, i)
+        if (result[0]):
+            print i
+            break
         # print x, y, node, tree[0:i+2, :], edges[0:i+1,:]
         # plt.plot(tree[0:i+2,0],tree[0:i+2,1],'.')
         # for k in range(i+1):
@@ -26,15 +54,32 @@ def build_tree(iter, tree, edges):
         # plt.xlim([20,80])
         # plt.ylim([20,80])
         # plt.show(block=False)
+        i = i + 1
 
     plt.close('all')
     plt.figure()
-    plt.plot(tree[0:i+2,0],tree[0:i+2,1],'.')
+    plt.plot(treeA[0,0],treeA[0,1],'ro',markersize = 10)
+    plt.plot(treeA[0:i+2,0],treeA[0:i+2,1],'b.')
+    plt.plot(treeB[0,0],treeB[0,1],'ro',markersize = 10)
+    plt.plot(treeB[0:i+2,0],treeB[0:i+2,1],'b.')
+    if (result[0]):
+        indA = result[1];
+        indB = result[2];
+        plt.plot([treeA[indA,0], treeB[indB,0]],[treeA[indA,1], treeB[indB,1]],linewidth = 5)
     plt.xlim([0,100])
     plt.ylim([0,100])
     for k in range(i+1):
-        plt.plot([tree[edges[k,0]][0],tree[edges[k,1]][0]],[tree[edges[k,0]][1],tree[edges[k,1]][1]])
+        plt.plot([treeA[edgesA[k,0]][0],treeA[edgesA[k,1]][0]],[treeA[edgesA[k,0]][1],treeA[edgesA[k,1]][1]])
+        plt.plot([treeB[edgesB[k,0]][0],treeB[edgesB[k,1]][0]],[treeB[edgesB[k,0]][1],treeB[edgesB[k,1]][1]])
     plt.show(block=False)
+
+def connect_trees(treeA, treeB, iter):
+    for i in range(iter+1):
+        for k in range(iter+1):
+            if ((treeA[i,0] - treeB[k,0])**2 + (treeA[i,1] - treeB[k,1])**2) < 4:
+                return True, i, k
+    return False, 0, 0
+
 
 
 def insert_vertex(node,tree,x,y,i):
@@ -62,4 +107,7 @@ def nearest_neighbor(x, y, tree, nodes):
     return min_node
 
 if __name__ == "__main__":
-    build_tree(iter,tree,edges)
+    start = time.time()
+    build_tree(iter,treeA, treeB ,edgesA, edgesB)
+    end = time.time()
+    print end-start
