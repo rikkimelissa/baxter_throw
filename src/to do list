@@ -1,3 +1,17 @@
+- Return current 2 points for joining to start the paths from
+- Flip and join the paths
+- Change to actual coordinates and velocities, adjust parameters
+
+
+
+
+
+
+
+
+
+
+
 - What is going on with Jacobian? Trajectory is the same even though the velocities are different?
 
 - Velocity may not matter?
