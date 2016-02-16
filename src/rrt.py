@@ -33,22 +33,23 @@ def build_tree(iter,treeA, treeB ,edgesA, edgesB):
     while i < iter:
         x = random()*100
         y = random()*100
-        vx = random()*50 - 25
-        vy = random()*50 - 25
+        vx = random()*40 - 15
+        vy = random()*40 - 15
         node = nearest_neighbor(x,y,vx,vy,treeA, i)
-        # choose_control
         treeA = insert_vertex(node,treeA,x,y,vx,vy,i,1)
         edgesA = insert_edge(edgesA, node, i)
-        # x = random()*100
-        # y = random()*100
-        # node = nearest_neighbor(x,y, treeB, i)
-        # # choose_control
-        # treeB, vB = insert_vertex(node,treeB,x,y,i, vB, -1)
-        # edgesB = insert_edge(edgesB, node, i)
-        # result = connect_trees(treeA, treeB, i)
-        # if (result[0]):
-        #     print i
-        #     break
+
+        x = random()*100
+        y = random()*100
+        vx = random()*40 - 15
+        vy = random()*40 - 15
+        node = nearest_neighbor(x,y,vx,vy,treeB, i)
+        treeB = insert_vertex(node,treeB,x,y,vx,vy,i,-1)
+        edgesB = insert_edge(edgesB, node, i)
+        result = connect_trees(treeA, treeB, i)
+        if (result[0]):
+            print i
+            break
         # print x, y, node, treeA[0:i+2, :], edgesA[0:i+1,:]
         # plt.plot(treeA[0:i+2,0],treeA[0:i+2,1],'.')
         # for k in range(i+1):
@@ -62,33 +63,33 @@ def build_tree(iter,treeA, treeB ,edgesA, edgesB):
     plt.figure()
     plt.plot(treeA[0,0],treeA[0,1],'ro',markersize = 10)
     plt.plot(treeA[0:i+2,0],treeA[0:i+2,1],'r.')
-    # plt.plot(treeB[0,0],treeB[0,1],'ro',markersize = 10)
-    # plt.plot(treeB[0:i+2,0],treeB[0:i+2,1],'b.')
-    # if (result[0]):
-    #     indA = result[1];
-    #     indB = result[2];
-    #     plt.plot([treeA[indA,0], treeB[indB,0]],[treeA[indA,1], treeB[indB,1]],'g',linewidth = 3)
+    plt.plot(treeB[0,0],treeB[0,1],'ro',markersize = 10)
+    plt.plot(treeB[0:i+2,0],treeB[0:i+2,1],'b.')
+    if (result[0]):
+        indA = result[1];
+        indB = result[2];
+        plt.plot([treeA[indA,0], treeB[indB,0]],[treeA[indA,1], treeB[indB,1]],'g',linewidth = 3)
     plt.xlim([0,100])
     plt.ylim([0,100])
-    for k in range(i-1):
-        plt.plot([treeA[edgesA[k,0]][0],treeA[edgesA[k,1]][0]],[treeA[edgesA[k,0]][1],treeA[edgesA[k,1]][1]],'r')
-        # plt.plot([treeB[edgesB[k,0]][0],treeB[edgesB[k,1]][0]],[treeB[edgesB[k,0]][1],treeB[edgesB[k,1]][1]],'b')
-    plt.show(block=False)
-    plt.figure()
-    plt.plot(treeA[0,2],treeA[0,3],'ro',markersize = 10)
-    plt.plot(treeA[0:i+2,2],treeA[0:i+2,3],'r.')
-    # plt.plot(treeB[0,0],treeB[0,1],'ro',markersize = 10)
-    # plt.plot(treeB[0:i+2,0],treeB[0:i+2,1],'b.')
-    # if (result[0]):
-    #     indA = result[1];
-    #     indB = result[2];
-    #     plt.plot([treeA[indA,0], treeB[indB,0]],[treeA[indA,1], treeB[indB,1]],'g',linewidth = 3)
-    plt.xlim([-25, 25])
-    plt.ylim([-25, 25])
     for k in range(i):
-        plt.plot([treeA[edgesA[k,0]][2],treeA[edgesA[k,1]][2]],[treeA[edgesA[k,0]][3],treeA[edgesA[k,1]][3]],'r')
-        # plt.plot([treeB[edgesB[k,0]][0],treeB[edgesB[k,1]][0]],[treeB[edgesB[k,0]][1],treeB[edgesB[k,1]][1]],'b')
+        plt.plot([treeA[edgesA[k,0]][0],treeA[edgesA[k,1]][0]],[treeA[edgesA[k,0]][1],treeA[edgesA[k,1]][1]],'r')
+        plt.plot([treeB[edgesB[k,0]][0],treeB[edgesB[k,1]][0]],[treeB[edgesB[k,0]][1],treeB[edgesB[k,1]][1]],'b')
     plt.show(block=False)
+    # plt.figure()
+    # plt.plot(treeA[0,2],treeA[0,3],'ro',markersize = 10)
+    # plt.plot(treeA[0:i+2,2],treeA[0:i+2,3],'r.')
+    # # plt.plot(treeB[0,0],treeB[0,1],'ro',markersize = 10)
+    # # plt.plot(treeB[0:i+2,0],treeB[0:i+2,1],'b.')
+    # # if (result[0]):
+    # #     indA = result[1];
+    # #     indB = result[2];
+    # #     plt.plot([treeA[indA,0], treeB[indB,0]],[treeA[indA,1], treeB[indB,1]],'g',linewidth = 3)
+    # plt.xlim([-25, 25])
+    # plt.ylim([-25, 25])
+    # for k in range(i):
+    #     plt.plot([treeA[edgesA[k,0]][2],treeA[edgesA[k,1]][2]],[treeA[edgesA[k,0]][3],treeA[edgesA[k,1]][3]],'r')
+    #     # plt.plot([treeB[edgesB[k,0]][0],treeB[edgesB[k,1]][0]],[treeB[edgesB[k,0]][1],treeB[edgesB[k,1]][1]],'b')
+    # plt.show(block=False)
 
 def connect_trees(treeA, treeB, iter):
     for i in range(iter+1):
