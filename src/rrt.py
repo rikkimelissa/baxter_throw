@@ -30,16 +30,11 @@ def find_path():
     edgesB = np.empty((iter+1,2))
     treeA[0] = pos_init
     treeB[0] = pos_goal
-    treeA, treeB, edgesA, edgesB = build_tree(iter,treeA, treeB ,edgesA, edgesB) 
-
-    plt.figure()
-    plt.plot(treeB)
-    plt.show(block=False)
+    treeA, treeB, edgesA, edgesB, indA, indB = build_tree(iter,treeA, treeB ,edgesA, edgesB) 
 
     pathA = np.empty((edgesA.shape[0],4))
-    length = edgesA.shape[0]
-    pathA[0] = treeA[length]
-    curEdge = edgesA[length-1]
+    pathA[0] = treeA[indA]
+    curEdge = edgesA[indA-1]
     ind = 1
     atOrigin = False
     while atOrigin == False:
@@ -49,15 +44,11 @@ def find_path():
         if curEdge[0] == 0:
             atOrigin = True
     pathA = pathA[0:ind,:]
-
-    plt.figure()
-    plt.plot(pathA[:,0],pathA[:,1])
-    plt.show(block=False)
+    plt.plot(pathA[:,0],pathA[:,1],'g',linewidth=2)
 
     pathB = np.empty((edgesB.shape[0],4))
-    length = edgesB.shape[0]
-    pathB[0] = treeB[length]
-    curEdge = edgesB[length-1]
+    pathB[0] = treeB[indB]
+    curEdge = edgesB[indB-1]
     ind = 1
     atOrigin = False
     while atOrigin == False:
@@ -68,18 +59,11 @@ def find_path():
             atOrigin = True
     pathB = pathB[0:ind,:]
 
-    plt.figure()
-    plt.plot(pathB[:,0],pathB[:,1])
+    plt.plot(pathB[:,0],pathB[:,1],'g',linewidth=2)
     plt.show(block=False)
 
-
-
-
-
-
-
-
-
+    path = np.vstack((pathA[::-1],pathB))
+    return path
 
 def build_tree(iter,treeA, treeB ,edgesA, edgesB):
     i = 0
@@ -143,13 +127,15 @@ def build_tree(iter,treeA, treeB ,edgesA, edgesB):
     #     plt.plot([treeA[edgesA[k,0]][2],treeA[edgesA[k,1]][2]],[treeA[edgesA[k,0]][3],treeA[edgesA[k,1]][3]],'r')
     #     # plt.plot([treeB[edgesB[k,0]][0],treeB[edgesB[k,1]][0]],[treeB[edgesB[k,0]][1],treeB[edgesB[k,1]][1]],'b')
     # plt.show(block=False)
-    return treeA[0:i+2,:], treeB[0:i+2,:], edgesA[0:i+1,:], edgesB[0:i+1,:]
+    return treeA[0:i+2,:], treeB[0:i+2,:], edgesA[0:i+1,:], edgesB[0:i+1,:], indA, indB
 
 def connect_trees(treeA, treeB, iter):
     for i in range(iter+1):
-        for k in range(iter+1):
-            if ((treeA[i,0] - treeB[k,0])**2 + (treeA[i,1] - treeB[k,1])**2) < .5:
-                return True, i, k
+        if ((treeA[i,0] - treeB[iter+1,0])**2 + (treeA[i,1] - treeB[iter+1,1])**2) < .5:
+            return True, i, iter+1
+    for k in range(iter+1):
+        if ((treeA[iter+1,0] - treeB[k,0])**2 + (treeA[iter+1,1] - treeB[k,1])**2) < .5:
+            return True, iter+1, k
     return False, 0, 0
 
 def insert_vertex(node,tree,x,y,vx,vy,i,dir):
@@ -171,10 +157,6 @@ def insert_vertex(node,tree,x,y,vx,vy,i,dir):
             xc = p[0]
             yc = p[1]
             vc = v_new
-    # alpha = atan2(y - tree[node,1], x - tree[node,0])
-    # xc = 2*cos(alpha) + tree[node,0]
-    # yc = 2*sin(alpha) + tree[node,1]
-    # print xc, yc, vc
 
     tree[i+1] = [xc,yc,vc[0],vc[1]]
     return tree
