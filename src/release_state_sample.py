@@ -38,13 +38,6 @@ def plot_results():
         alpha_list[i] = alpha;
     N = 100
     ind = range(N)
-    # width = 1
-    # fig, ax = plt.subplots()
-    # rect2 = ax.bar([x + y for x, y in zip(ind, [width]*100)],throw_y_list, width, color = 'r')
-    # rect2 = ax.bar([x for x in ind],throw_y_list, width, color = 'y')
-    # rect3 = ax.bar([x+100 for x in ind],throw_z_list, width, color = 'g')
-    # rect4 = ax.bar([x+200 for x in ind],vel_list, width, color = 'b')
-    # rect5 = ax.bar([x+300 for x in ind],alpha_list, width, color = 'c')
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(throw_y_list, throw_z_list, vel_list)
@@ -92,4 +85,3 @@ def find_velocity_param(dx,dy,dz, rand):
             v_list.append(v)
             inc += 1 
             return alpha, v
-    # return alpha_list, v_list
