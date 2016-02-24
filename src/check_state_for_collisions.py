@@ -15,6 +15,18 @@ import copy
 
 import kbhit
 
+def checkCollision(js):
+        coll_client = rospy.ServiceProxy("check_state_validity", GetStateValidity)
+        gsvr = GetStateValidityRequest()
+        rs = RobotState()
+        rs.joint_state = ts
+        # rospy.loginfo(rs)
+        gsvr.robot_state = rs
+        gsvr.group_name = "both_arms"
+        resp = coll_client(gsvr)
+        rospy.loginfo(resp.valid)
+
+
 
 class CheckCollisionState( object ):
     def __init__(self):
