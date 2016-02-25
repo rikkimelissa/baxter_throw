@@ -164,13 +164,7 @@ def main():
     rospy.on_shutdown(traj.stop)
     # Command Current Joint Positions first
     limb_interface = baxter_interface.limb.Limb('right')
-    # gripper = baxter_interface.gripper.Gripper('right')
-    # gripper.calibrate()
-    # # gripper.set_velocity(50)
-    # gripper.close()
-    # gripper.close()
-    # gripper.close()
-    # gripper.close()
+
     rospy.sleep(.5)
     current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
     traj.add_point_p(current_angles, 0.0)

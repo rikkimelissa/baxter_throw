@@ -25,13 +25,15 @@ class CheckCollisionState( object ):
         self.js_pub = rospy.Publisher("collision_state", Int16, queue_size = 10)
         return
 
-
     def js_cb(self, a):
+        rospy.loginfo('Received array')
         js = JointState()
         js.name = ['head_pan', 'right_s0', 'right_s1', 'right_e0', 'right_e1', 'right_w0', 'right_w1', 'right_w2', 'left_s0', 'left_s1', 'left_e0', 'left_e1', 'left_w0', 'left_w1', 'left_w2']
         jList = a.data
         jMatrix = np.reshape(jList,(jList.shape[0]/15,15))
+        i = 0
         for pos in jMatrix:
+            rospy.loginfo(pos)
             js.position = pos
             gsvr = GetStateValidityRequest()
             rs = RobotState()
@@ -41,8 +43,10 @@ class CheckCollisionState( object ):
             resp = self.coll_client(gsvr)
             if (resp.valid == False):
                 rospy.loginfo('false')
+                rospy.loginfo(i)
                 self.js_pub.publish(0)
                 return
+            i = i + 1
         self.js_pub.publish(1)
         rospy.loginfo('true')
         return   

@@ -4,16 +4,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import atan2, sin, cos
 import time
-from release_state_solve import find_feasible_release
+from release_state_sample import test_pos
+
+catch_x = .68
+catch_z = -.6 # range from - .5 to 0 # lower range determined by baxter
+catch_y = .7 
 
 def find_path(plot):
 
+    # throw_y = .20516
+    # throw_z = .3073
+    # vel = 1.03
+    # alpha = 1.55
+    # pos_goal = [throw_y, throw_z, vel*cos(alpha), vel*sin(alpha)]
     pos_init = [-.62, -.1, 0, 0]
-    throw_y = .20516
-    throw_z = .3073
-    vel = 1.03
-    alpha = 1.55
-    pos_goal = [throw_y, throw_z, vel*cos(alpha), vel*sin(alpha)]
+    pos_goal = test_pos(catch_x, catch_y, catch_z)
+    while pos_goal == None:
+        pos_goal = test_pos(catch_x, catch_y, catch_z)
+
     iter = 1000;
 
     treeA = np.empty((iter+1,4))
@@ -130,7 +138,7 @@ def insert_vertex(node,tree,x,y,vx,vy,i,dir):
     forceControls = np.array(([1,0],[-1,0],[0,1],[0,-1]))
     mass = 1 #???
     dt = .01 # seconds
-    error = 1000000
+    error = 100000000
 
     # choose the control that pulls the tree toward the random point
     for force in forceControls:
