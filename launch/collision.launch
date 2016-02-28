@@ -3,10 +3,16 @@
   <arg name="vis" default="false" /> <!-- run rviz? -->
   <arg name="gui" default="false" /> <!-- run joint_state_publisher? -->
   <arg name="sim" default="false" /> <!-- start gazebo? -->
-  <arg name="grip" default="true" /> <!-- add grippers? -->
+  <arg name="grip" default="false" /> <!-- add grippers? -->
   <arg name="traj" default="false" /> <!-- trajectory execution? -->
   <arg name="check" default="true" /> <!-- check state validity? -->
   
+  <!-- start nodes -->
+  <node name="throw" pkg="baxter_throw" type="throw_path.py" />
+
+  <!-- start JTAS -->
+  <node name="jtas" pkg="baxter_interface" type="joint_trajectory_action_server.py" />
+
   <!-- start move group and moveit planning context -->
   <include file="$(find baxter_moveit_config)/launch/planning_context.launch">
     <arg name="load_robot_description" value="true"/>
