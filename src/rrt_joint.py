@@ -135,45 +135,11 @@ def build_tree(iter,treeA, treeB ,edgesA, edgesB, plot, kdl_kin):
             print i
             break
 
-        # print x, y, node, tree[0:i+2, :], edges[0:i+1,:]
-        # plt.plot(treeA[0:i+2,0],treeA[0:i+2,1],'r.')
-        # plt.plot(treeB[0:i+2,0],treeB[0:i+2,1],'b.')
-        # for k in range(i+1):
-        #     plt.plot([treeA[edgesA[k,0]][0],treeA[edgesA[k,1]][0]],[treeA[edgesA[k,0]][1],treeA[edgesA[k,1]][1]],'r')
-        #     plt.plot([treeB[edgesB[k,0]][0],treeB[edgesB[k,1]][0]],[treeB[edgesB[k,0]][1],treeB[edgesB[k,1]][1]],'b')
-        # plt.xlim([-1,1.5])
-        # plt.ylim([-1,1])
-        # plt.show(block=False)
         i = i + 1
 
-        # x = random()*.2 + .6
-        # y = random()*.86 -.62
-        # vx = random()*1.2 + .3
-        # vy = random()*1.5
-        # node = nearest_neighbor(x,y,vx,vy,treeB, i)
-        # treeA = insert_vertex(node,treeA,x,y,vx,vy,i,1)
-        # edgesA = insert_edge(edgesA, node, i)
-
-        # x = random()*.2 + .6
-        # y = random()*.86 -.62
-        # vx = random()*1.2 + .3
-        # vy = random()*1.5
-        # node = nearest_neighbor(x,y,vx,vy,treeB, i)
-        # treeB = insert_vertex(node,treeB,x,y,vx,vy,i,-1)
-        # edgesB = insert_edge(edgesB, node, i)
-        # result = connect_trees(treeA, treeB, i)
-        # if (result[0]):
-        #     print i
-        #     break
-        # i = i + 1
 
     if (plot):
         plt.close('all')
-        # plt.figure()
-        # plt.plot(treeA[0,0],treeA[0,1],'ro',markersize = 10)
-        # plt.plot(treeA[0:i+2,0],treeA[0:i+2,1],'r.')
-        # plt.plot(treeB[0,0],treeB[0,1],'ro',markersize = 10)
-        # plt.plot(treeB[0:i+2,0],treeB[0:i+2,1],'b.')
 
         fig = plt.figure()
         ax = fig.gca(projection='3d')
@@ -202,39 +168,6 @@ def build_tree(iter,treeA, treeB ,edgesA, edgesB, plot, kdl_kin):
     return treeA[0:i+2,:], treeB[0:i+2,:], edgesA[0:i+1,:], edgesB[0:i+1,:], indA, indB
 
 def connect_trees(treeA, treeB, iter, kdl_kin):
-    # for i in range(iter+1):
-    #     p1 = treeA[i,:]
-    #     p2 = treeB[iter+1,:]
-    #     c1 = kdl_kin.forward(p1[0:7])
-    #     c2 = kdl_kin.forward(p2[0:7])
-    #     error = (c1[1,3] - c2[1,3])**2 + (c1[2,3] - c2[2,3])**2
-    #     if error < .01:
-    #         return True, i, iter + 1
-    # for k in range(iter+1):
-    #     p1 = treeA[iter+1,:]
-    #     p2 = treeB[k,:]
-    #     c1 = kdl_kin.forward(p1[0:7])
-    #     c2 = kdl_kin.forward(p2[0:7])
-    #     error = (c1[1,3] - c2[1,3])**2 + (c1[2,3] - c2[2,3])**2
-    #     if error < .01:
-    #         return True, iter+1, k
-
-    # for i in range(iter+1):
-    #     sum = 0
-    #     for j in range(7):
-    #         sum += (treeA[i,j] - treeB[iter+1,j])**2
-    #     if sum < .1:
-    #         return True, i, iter+1
-    #     # if ((treeA[i,0] - treeB[iter+1,0])**2 + (treeA[i,1] - treeB[iter+1,1])**2) < .001:
-    #     #     return True, i, iter+1
-    # for k in range(iter+1):
-    #     sum = 0
-    #     for j in range(7):
-    #         sum += (treeA[iter+1,j] - treeB[k,j])**2
-    #     if sum < .1:
-    #         return True, iter+1, k
-    #     if ((treeA[iter+1,0] - treeB[k,0])**2 + (treeA[iter+1,1] - treeB[k,1])**2) < .001:
-    #         return True, iter+1, k
 
     for i in range(iter+1):
         j = 0
@@ -312,10 +245,7 @@ def nearest_neighbor(joints, vels, tree, nodes):
         for j in range(7):
             distPos += (joints[j] - tree[i,j])**2
             distVel += (vels[j] - tree[i,j+7])**2
-        # distPos = (x - tree[i,0])**2 + (y-tree[i,1])**2
-        # distVel = (vx - tree[i,2])**2 + (vy-tree[i,3])**2
         dist = wp*distPos + wv*distVel;
-        # print i, dist
         if (dist < min_dist):
             min_dist = dist
             min_node = i

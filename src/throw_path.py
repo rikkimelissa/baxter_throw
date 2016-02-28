@@ -53,9 +53,8 @@ from baxter_interface import CHECK_VERSION
 
 from functions import JointTrajectory
 import numpy as np
-from solve_system import jointPath, jointVelocity, jointAcceleration
 from solve_linear_system import linearSpace
-
+from std_msgs.msg import Float32MultiArray
 
 class Trajectory(object):
     def __init__(self, limb):
@@ -74,11 +73,19 @@ class Trajectory(object):
                          " before running example.")
             rospy.signal_shutdown("Timed out waiting for Action Server")
             sys.exit(1)
+        self._sub = rospy.Subscriber('joint_path', numpy_msg(Float32MultiArray), self.path_cb)
         self.clear(limb)
 
     def add_point_p(self, positions, time):
         point = JointTrajectoryPoint()
         point.positions = copy(positions)
+        point.time_from_start = rospy.Duration(time)
+        self._goal.trajectory.points.append(point)
+
+    def add_point_pv(self, positions, velocities, time):
+        point = JointTrajectoryPoint()
+        point.positions = copy(positions)
+        point.velocities = copy(velocities)
         point.time_from_start = rospy.Duration(time)
         self._goal.trajectory.points.append(point)
 
@@ -108,6 +115,21 @@ class Trajectory(object):
         self._goal.goal_time_tolerance = self._goal_time_tolerance
         self._goal.trajectory.joint_names = [limb + '_' + joint for joint in \
             ['s0', 's1', 'e0', 'e1', 'w0', 'w1', 'w2']]
+
+    def path_cb(self,a):
+        rospy.loginfo('Received path')
+        pList = a.data;
+        pMat = np.reshape(pList,(pList.shape[0]/14,14))
+        pArm = pMat[:,0:7]
+        vArm = pMat[:,7:14]
+        N = pArm.shape[0]
+        T = 2
+        t_all = np.linspace(0 + self._t_delay,T + self._t_delay, N);
+        for i in range(N):
+            self.add_point_pv(pArm[i,:].tolist(), vArm[i,:].tolist(),t_all[i])
+        # traj.add_point_p(thList[i,:].tolist(), t_all[i])
+        self.start()
+        self.wait(10)
 
 
 def main():
@@ -168,26 +190,24 @@ def main():
     rospy.sleep(.5)
     current_angles = [limb_interface.joint_angle(joint) for joint in limb_interface.joint_names()]
     traj.add_point_p(current_angles, 0.0)
-    t_delay = 5.0
-    # traj.add_point_p(q_start.tolist(),t_delay)
+    traj._t_delay = 5.0
 
+    # T = 1.7
+    # N = 50*T
+    # dt = float(T)/(N-1)
+    # vy = .8 # nominal .8
+    # vz = .4 # nominal .4
+    # jerk = -20 #nominal -5
 
-    T = 1.7
-    N = 50*T
-    dt = float(T)/(N-1)
-    vy = .8 # nominal .8
-    vz = .4 # nominal .4
-    jerk = -20 #nominal -5
+    # # plt.close('all')
 
-    # plt.close('all')
-
-    thList, vList = linearSpace(False, T, N, vy, vz, jerk)
-    # thList = thList[1:,:]
-    # vList = np.diff(thList,axis=0)/dt
-    # vList = np.vstack((np.array([0,0,0,0,0,0,0]),vList))
-    aList = np.diff(vList,axis=0)/dt
-    aList = np.vstack((np.array([0,0,0,0,0,0,0]),aList))
-    t_all = np.linspace(0 + t_delay,2*T + t_delay, N*2);
+    # thList, vList = linearSpace(False, T, N, vy, vz, jerk)
+    # # thList = thList[1:,:]
+    # # vList = np.diff(thList,axis=0)/dt
+    # # vList = np.vstack((np.array([0,0,0,0,0,0,0]),vList))
+    # aList = np.diff(vList,axis=0)/dt
+    # aList = np.vstack((np.array([0,0,0,0,0,0,0]),aList))
+    # t_all = np.linspace(0 + t_delay,2*T + t_delay, N*2);
 
     # plt.figure()
     # plt.plot(thList)
@@ -204,20 +224,15 @@ def main():
 
     traj.add_point_p(thList[0,:].tolist(),t_delay)
 
-    for i in range(int(2*N)-2):
-        traj.add_point(thList[i,:].tolist(), vList[i,:].tolist(), aList[i,:].tolist(),t_all[i])
-        # traj.add_point_p(thList[i,:].tolist(), t_all[i])
+    # for i in range(int(2*N)-2):
+    #     traj.add_point(thList[i,:].tolist(), vList[i,:].tolist(), aList[i,:].tolist(),t_all[i])
 
-    traj.start()
-    rospy.sleep(T+t_delay+.005)
-    # gripper.open()
-    # gripper.open()
-    # gripper.open()
-    # gripper.open()
-    # gripper.open()
+    # traj.start()
 
-    traj.wait(30.0)
-    traj.clear(limb)
+    # traj.wait(30.0)
+    # traj.clear(limb)
+
+    rospy.spin()
 
 
     print("Exiting - Joint Trajectory Action Test Complete")

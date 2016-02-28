@@ -22,7 +22,7 @@ class CheckCollisionState( object ):
             pass
         self.coll_client = rospy.ServiceProxy("check_state_validity", GetStateValidity)
         self.js_sub = rospy.Subscriber("joint_state_check", numpy_msg(Float32MultiArray), self.js_cb)
-        self.js_pub = rospy.Publisher("collision_state", Int16, queue_size = 10)
+        self.js_pub = rospy.Publisher("collision_check", Int16, queue_size = 10)
         return
 
     def js_cb(self, a):
