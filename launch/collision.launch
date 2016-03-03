@@ -7,9 +7,11 @@
   <arg name="traj" default="false" /> <!-- trajectory execution? -->
   <arg name="check" default="true" /> <!-- check state validity? -->
   
-  <!-- start nodes -->
-  <node name="throw" pkg="baxter_throw" type="throw_path.py" />
-
+  <!-- start gazebo -->
+  <group if="$(arg sim)" >
+  <include file="$(find baxter_gazebo)/launch/baxter_world.launch" />
+  </group>
+  
   <!-- start JTAS -->
   <node name="jtas" pkg="baxter_interface" type="joint_trajectory_action_server.py" />
 
@@ -26,11 +28,6 @@
   <group if="$(arg grip)">
     <node pkg="baxter_throw" type="add_grippers.sh" name="gripper_modifier"
         output="screen" respawn="false" />
-  </group>
-
-  <!-- start gazebo -->
-  <group if="$(arg sim)" >
-  <include file="$(find baxter_gazebo)/launch/baxter_world.launch" />
   </group>
   
   <!-- MoveIt! Configurations: -->
@@ -66,5 +63,8 @@
     <node pkg="rviz" type="rviz" respawn="false" name="rviz"
       args="-d $(find collision_check_demo)/launch/collision_demo.rviz" />
   </group>
+
+  <!-- start nodes -->
+  <node name="throw" pkg="baxter_throw" type="throw_path.py" />
 
 </launch>
