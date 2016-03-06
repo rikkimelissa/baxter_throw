@@ -31,9 +31,9 @@ def main():
         vertex1 = traj[ind1,:]
         vertex2 = traj[ind2,:]
         s = shortcut(vertex1,vertex2)
-        if (collision_free(s)):
-            traj = np.delete(traj,range(ind1+1,ind2),0)
-            traj = np.insert(traj,ind1+1,s,0)
+        # if (collision_free(s)):
+        #     traj = np.delete(traj,range(ind1+1,ind2),0)
+        #     traj = np.insert(traj,ind1+1,s,0)
 
 def shortcut(vertex1, vertex2):
     a_max = 4.0
@@ -50,6 +50,7 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
     T2 = 20
     T3 = 20
     T4 = 20
+    T = 20
 
     # P+P-
     tp1, tp2 = quad_solve(a_max, 2*v1, (v1-v2)*(v1+v2)/(2*a_max) + x1 - x2)
@@ -58,7 +59,7 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
         print T1
     if tp2 > 0 and tp2 > (v2-v1)/a_max and v1+tp2*a_max < v_max:
         T1 = 2*tp2 + (v1-v2)/a_max 
-        print T1
+        print ("t1"),T1
 
     # P-P+
     tp1, tp2 = quad_solve(-a_max, 2*v1, (v1-v2)*(v1+v2)/(2*-a_max) + x1 - x2)
@@ -67,66 +68,38 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
         print T2
     if tp2 > 0 and tp2 > (v2-v1)/-a_max and v1+tp2*-a_max > -v_max:
         T2 = 2*tp2 + (v1-v2)/-a_max
-        print T2
+        print ("t2"),T2
 
     # P+L+P-
     t1 = (v_max - v1)/a_max
     t2 = (v2 - v_max)/(-a_max)
     xp1 = a_max/2*t1**2 + v1*t1 + x1
-    # t =  np.linspace(-t2,0,num=30)
-    # v = v2 - a_max*t
-    # xp2 = x2 - a_max/2*t**2 + v_max*t
     xp2 = x2 - a_max/2*t2**2 - v_max*t2
-    # plt.close('all')
-    # plt.figure()
-    # plt.plot(t,xp2)
-    # plt.show(block=False)
-    # plt.figure()
-    # plt.plot(t,v)
-    # plt.show(block=False)
     tl = (xp2 - xp1)/v_max
     if t1 > 0 and t2 > 0 and tl > 0:
         T3 = t1 + t2 + tL
-    # print t1, t2, tl
-    # tl = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a_max) + (x2-x1)/v_max
-    # print tl
+        print ("t3"),T3
 
     # P-L-P+
     t1 = (-v_max - v1)/-a_max
     t2 = (v2 + v_max)/(a_max)
-    xp1 = -a_max*t1**2 + v1*t1 + x1
-    # t =  np.linspace(-t2,0,num=30)
-    xp2 = x2 + a_max*t2**2 + v_max*t2
-    tl = (xp2 - xp1)/v_max
+    xp1 = -a_max/2*t1**2 + v1*t1 + x1
+    xp2 = x2 + a_max/2*t2**2 - v_max*t2
+    tl = (xp2 - xp1)/-v_max
     if t1 > 0 and t2 > 0 and tl > 0:
-        T3 = t1 + t2 + tL
-    print t1, t2, tl
+        T4 = t1 + t2 + tl
+        print ("t4"), T4
+
+    if (T1 < T):
+        T = T1
+    if (T2 < T):
+        T = T2;
+    if (T3 < T):
+        T = T3
+    if (T4 < T):
+        T = T4
 
 
-
-
-    xp2 = 
-    print xp2
-
-    a_max = -a_max
-    tL = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a_max) + (x2-x1)/v_max
-    tp1 = (v_max - v1)/a_max
-    tp2 = (v_max - v1)/a_max
-    print tL, tp1, tp2
-    if tL > 0 and tp1 > 0 and tp2 > 0:
-        T3 = tL + tp1 + tp2
-        print T3
-
-    # P-L-P+
-    a_max = -a_max
-    v_max = -v_max
-    tL = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a_max) + (x2-x1)/v_max
-    tp1 = (v_max - v1)/a_max
-    tp2 = (v_max - v2)/a_max
-    print tL, tp1, tp2
-    if tL > 0 and tp1 > 0 and tp2 > 0:
-        T4 = tL + tp1 + tp2
-        print T4
 
 def quad_solve(a,b,c):
     if b**2 - 4*a*c > 0:
