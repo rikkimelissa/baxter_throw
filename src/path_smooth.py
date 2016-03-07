@@ -109,7 +109,6 @@ def min_acc(x1,x2,v1,v2,v_max,T):
     a4 = 20
     a = 20
 
-
     #P+P-
     sig = 1
     ap1,ap2 = quad_solve(a**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v2-v1)**2)
@@ -117,6 +116,17 @@ def min_acc(x1,x2,v1,v2,v_max,T):
         ts = 1/2.*(T+(v2-v1)/ap1)
         if ts > 0 and ts < T and v1+ap1*ts < v_max:
             a1 = ap1
+            tpp1 = np.linspace(0,ts,num=15)
+            tpp2 = np.linspace(ts,T,num=15)
+            x1 = a/2*tpp1**2 + v1*tpp1 + x1
+            v1 = a*tpp1 + v1
+            plt.close('all')
+            plt.figure()
+            plt.plot(tpp1,x1)
+            plt.figure()
+            plt.plot(tpp1,v1)
+            plt.show(block=False)
+            
     if ap2 > 0:
         ts = 1/2.*(T+(v2-v1)/ap2)
         if ts > 0 and ts < T and v1+ap2*ts < v_max:
@@ -155,15 +165,15 @@ def min_acc(x1,x2,v1,v2,v_max,T):
         a4 = a
 
     if (a1 < a):
-        a = a1
+        traj = traj1
     if (a2 < a):
-        a = a2;
+        traj = traj2
     if (a3 < a):
-        a = a3
+        traj = traj3
     if (a4 < a):
-        a = a4
+        traj = traj4
 
-    return a
+    return traj
 
 def quad_solve(a,b,c):
     if b**2 - 4*a*c > 0:
