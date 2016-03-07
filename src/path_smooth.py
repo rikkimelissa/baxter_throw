@@ -99,7 +99,71 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
     if (T4 < T):
         T = T4
 
+    return T
 
+def min_acc(x1,x2,v1,v2,v_max,T):
+
+    a1 = 20
+    a2 = 20
+    a3 = 20
+    a4 = 20
+    a = 20
+
+
+    #P+P-
+    sig = 1
+    ap1,ap2 = quad_solve(a**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v2-v1)**2)
+    if ap1 > 0:
+        ts = 1/2.*(T+(v2-v1)/ap1)
+        if ts > 0 and ts < T and v1+ap1*ts < v_max:
+            a1 = ap1
+    if ap2 > 0:
+        ts = 1/2.*(T+(v2-v1)/ap2)
+        if ts > 0 and ts < T and v1+ap2*ts < v_max:
+            a1 = ap2
+
+    #P-P+
+    sig = -1
+    ap1,ap2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v2-v1)**2)
+    if ap1 > 0:
+        ts = 1/2.*(T+(v2-v1)/ap1)
+        if ts > 0 and ts < T and v1+ap1*ts < v_max:
+            a2 = ap1
+    if ap2 > 0:
+        ts = 1/2.*(T+(v2-v1)/ap2)
+        if ts > 0 and ts < T and v1+ap2*ts < v_max:
+            a2 = ap2
+
+    # P+L+P-
+    a = (v_max**2 - v_max*(v1+v2) + .5*(v1**2 + v2**2))/(T*v_max - (x2-x1))
+    t1 = (v_max - v1)/a
+    t2 = (v2 - v_max)/(-a)
+    xp1 = a/2*t1**2 + v1*t1 + x1
+    xp2 = x2 - a/2*t2**2 - v_max*t2
+    tl = (xp2 - xp1)/v_max
+    if t1 > 0 and t2 > 0 and tl > 0:
+        a3 = a
+
+    # P-L-P+
+    a = (-v_max**2 + v_max*(v1+v2) + .5*(v1**2 + v2**2))/(T*-v_max - (x2-x1))
+    t1 = (-v_max - v1)/-a
+    t2 = (v2 + v_max)/(a)
+    xp1 = -a/2*t1**2 + v1*t1 + x1
+    xp2 = x2 + a/2*t2**2 - v_max*t2
+    tl = (xp2 - xp1)/-v_max
+    if t1 > 0 and t2 > 0 and tl > 0:
+        a4 = a
+
+    if (a1 < a):
+        a = a1
+    if (a2 < a):
+        a = a2;
+    if (a3 < a):
+        a = a3
+    if (a4 < a):
+        a = a4
+
+    return a
 
 def quad_solve(a,b,c):
     if b**2 - 4*a*c > 0:
