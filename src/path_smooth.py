@@ -73,22 +73,30 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
     # P+L+P-
     t1 = (v_max - v1)/a_max
     t2 = (v2 - v_max)/(-a_max)
-    xp1 = a_max/2*t1**2 + v1*t1 + x1
-    xp2 = x2 - a_max/2*t2**2 - v_max*t2
-    tl = (xp2 - xp1)/v_max
-    if t1 > 0 and t2 > 0 and tl > 0:
+    tL = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a_max) + (x2-x1)/v_max
+    # xp1 = a_max/2*t1**2 + v1*t1 + x1
+    # vp1 = a_max*t1 + v1
+    # xp2 = v_max*tl2+xp1
+    # xp3 = -a_max/2*t2**2 + v_max*t2 + xp2
+    # vp2 = -a_max*t2 + v_max
+    # print tl2, t1, t2, xp1, xp2, xp3, vp2
+    if t1 > 0 and t2 > 0 and tL > 0:
         T3 = t1 + t2 + tL
         print ("t3"),T3
 
     # P-L-P+
     t1 = (-v_max - v1)/-a_max
     t2 = (v2 + v_max)/(a_max)
-    xp1 = -a_max/2*t1**2 + v1*t1 + x1
-    xp2 = x2 + a_max/2*t2**2 - v_max*t2
-    tl = (xp2 - xp1)/-v_max
-    if t1 > 0 and t2 > 0 and tl > 0:
-        T4 = t1 + t2 + tl
-        print ("t4"), T4
+    tL = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a_max) + (x2-x1)/-v_max
+    # xp1 = -a_max/2*t1**2 + v1*t1 + x1
+    # vp1 = -a_max*t1 + v1
+    # xp2 = -v_max*tL+xp1
+    # xp3 = a_max/2*t2**2 + -v_max*t2 + xp2
+    # vp2 = a_max*t2 + -v_max
+    # print tL, t1, t2, xp1, xp2, xp3, vp2
+    if t1 > 0 and t2 > 0 and tL > 0:
+        T3 = t1 + t2 + tL
+        print ("t3"),T3
 
     if (T1 < T):
         T = T1
@@ -111,22 +119,37 @@ def min_acc(x1,x2,v1,v2,v_max,T):
 
     #P+P-
     sig = 1
-    ap1,ap2 = quad_solve(a**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v2-v1)**2)
+    ap1,ap2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v1-v2)**2)
     if ap1 > 0:
         ts = 1/2.*(T+(v2-v1)/ap1)
         if ts > 0 and ts < T and v1+ap1*ts < v_max:
             a1 = ap1
-            tpp1 = np.linspace(0,ts,num=15)
-            tpp2 = np.linspace(ts,T,num=15)
-            x1 = a/2*tpp1**2 + v1*tpp1 + x1
-            v1 = a*tpp1 + v1
-            plt.close('all')
-            plt.figure()
-            plt.plot(tpp1,x1)
-            plt.figure()
-            plt.plot(tpp1,v1)
-            plt.show(block=False)
-            
+            tpp1 = np.linspace(0,ts,num=10)
+            tpp2 = np.linspace(ts,T,num=10)
+            xp1 = a1/2*tpp1**2 + v1*tpp1 + x1
+            vp1 = a1*tpp1 + v1
+            xp = a1/2*ts**2 + v1*ts + x1
+            vp = a1*ts + v1
+            xp2 = -a1/2*(tpp2 - ts)**2 + vp*(tpp2-ts) + xp 
+            vp2 = -a1*(tpp2-ts) + vp
+
+            xt1 = np.hstack((xp1,xp2[1:]))
+            tt1 = np.hstack((tpp1,tpp2[1:]))
+            vt1 = np.hstack((vp1,vp2[1:]))
+            # plt.plot(tt1,xt1)
+            # # plt.close('all')
+
+            # plt.figure()
+            # plt.plot(tpp1,xp1)
+            # plt.hold(True)
+            # plt.plot(tpp2,xp2)
+
+            # plt.figure()
+            # plt.plot(tpp1,vp1)
+            # plt.hold(True)
+            # plt.plot(tpp2,vp2)
+
+            # plt.show(block=False)       
     if ap2 > 0:
         ts = 1/2.*(T+(v2-v1)/ap2)
         if ts > 0 and ts < T and v1+ap2*ts < v_max:
