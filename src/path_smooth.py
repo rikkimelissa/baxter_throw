@@ -43,17 +43,31 @@ def shortcut(vertex1, vertex2):
     a_max = 4.0
     v_max = 2.0
     T = 0
+    s = np.zeros((30,15))
+    plt.figure(1)
+    plt.plot(np.vstack((vertex1[1:8],vertex2[1:8])),'.')
+    plt.figure(2)
+    plt.plot(np.vstack((vertex1[8:],vertex2[8:])),'.')    
     for i in range(7):
         if i > 3:
             v_max = 4
         t = execution_time(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,a_max)
         if t > T:
             T = t
+    v_max = 2.0
     for i in range(7):
+        if i > 3:
+            v_max = 4.0
         time, pos, vel = traj_min_acc(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,T)
-        plt.plot(time, pos)
-    plt.show(block=False)
-
+        s[:,i+1] = pos
+        s[:,i+7] = vel
+    s[:,0] = time
+    # for i in range(7):
+    #     plt.figure(1)
+    #     plt.plot(s[:,0], s[:,i+1])
+    #     plt.figure(2)
+    #     plt.plot(s[:,0], s[:,i+7])
+    # plt.show(block=False)
 
 
 
@@ -129,8 +143,8 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         ts = 1/2.*(T+(v2-v1)/ap1)
         if ts > 0 and ts < T and v1+ap1*ts < v_max:
             a1 = ap1
-            tpp1 = tSpace[tSpace < ts/T]
-            tpp2 = tSpace[tSpace > ts/T]
+            tpp1 = tSpace[tSpace < ts]
+            tpp2 = tSpace[tSpace > ts]
             xp1 = a1/2*tpp1**2 + v1*tpp1 + x1
             vp1 = a1*tpp1 + v1
             xp = a1/2*ts**2 + v1*ts + x1
@@ -138,15 +152,15 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
             xp2 = -a1/2*(tpp2 - ts)**2 + vp*(tpp2-ts) + xp 
             vp2 = -a1*(tpp2-ts) + vp
 
-            xt1 = np.hstack((xp1,xp2[1:]))
-            tt1 = np.hstack((tpp1,tpp2[1:]))
-            vt1 = np.hstack((vp1,vp2[1:]))   
+            xt1 = np.hstack((xp1,xp2))
+            tt1 = np.hstack((tpp1,tpp2))
+            vt1 = np.hstack((vp1,vp2))   
     if ap2 > 0:
         ts = 1/2.*(T+(v2-v1)/ap2)
         if ts > 0 and ts < T and v1+ap2*ts < v_max:
             a1 = ap2
-            tpp1 = tSpace[tSpace < ts/T]
-            tpp2 = tSpace[tSpace > ts/T]
+            tpp1 = tSpace[tSpace < ts]
+            tpp2 = tSpace[tSpace > ts]
             xp1 = a1/2*tpp1**2 + v1*tpp1 + x1
             vp1 = a1*tpp1 + v1
             xp = a1/2*ts**2 + v1*ts + x1
@@ -154,9 +168,9 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
             xp2 = -a1/2*(tpp2 - ts)**2 + vp*(tpp2-ts) + xp 
             vp2 = -a1*(tpp2-ts) + vp
 
-            xt1 = np.hstack((xp1,xp2[1:]))
-            tt1 = np.hstack((tpp1,tpp2[1:]))
-            vt1 = np.hstack((vp1,vp2[1:]))   
+            xt1 = np.hstack((xp1,xp2))
+            tt1 = np.hstack((tpp1,tpp2))
+            vt1 = np.hstack((vp1,vp2))   
 
     #P-P+
     sig = -1
@@ -165,8 +179,8 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         ts = 1/2.*(T+(v1-v2)/ap1)
         if ts > 0 and ts < T and v1+ap1*ts < v_max:
             a2 = ap1
-            tpp1 = tSpace[tSpace <= ts/T]
-            tpp2 = tSpace[tSpace > ts/T]
+            tpp1 = tSpace[tSpace <= ts]
+            tpp2 = tSpace[tSpace > ts]
             xp1 = -a2/2*tpp1**2 + v1*tpp1 + x1
             vp1 = -a2*tpp1 + v1
             xp = -a2/2*ts**2 + v1*ts + x1
@@ -344,7 +358,7 @@ def path2traj(path):
 
 if __name__ == "__main__":
     try:
-        main()
+        x=1
     except rospy.ROSInterruptException:
         pass
 
