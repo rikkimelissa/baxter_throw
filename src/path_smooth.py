@@ -28,6 +28,10 @@ def main():
         path_length = traj.shape[0]
         ind1 = round(random()*path_length)
         ind2 = round(random()*path_length)
+        if (ind1 > ind2):
+            temp = ind1;
+            ind1 = ind2;
+            ind2 = temp
         vertex1 = traj[ind1,:]
         vertex2 = traj[ind2,:]
         s = shortcut(vertex1,vertex2)
@@ -38,10 +42,22 @@ def main():
 def shortcut(vertex1, vertex2):
     a_max = 4.0
     v_max = 2.0
+    T = 0
     for i in range(7):
         if i > 3:
             v_max = 4
-        time = execution_time(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,a_max)
+        t = execution_time(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,a_max)
+        if t > T:
+            T = t
+    for i in range(7):
+        time, pos, vel = traj_min_acc(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,T)
+        plt.plot(time, pos)
+    plt.show(block=False)
+
+
+
+
+
 
 
 def execution_time(x1,x2,v1,v2,v_max,a_max):
@@ -74,12 +90,6 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
     t1 = (v_max - v1)/a_max
     t2 = (v2 - v_max)/(-a_max)
     tL = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a_max) + (x2-x1)/v_max
-    # xp1 = a_max/2*t1**2 + v1*t1 + x1
-    # vp1 = a_max*t1 + v1
-    # xp2 = v_max*tl2+xp1
-    # xp3 = -a_max/2*t2**2 + v_max*t2 + xp2
-    # vp2 = -a_max*t2 + v_max
-    # print tl2, t1, t2, xp1, xp2, xp3, vp2
     if t1 > 0 and t2 > 0 and tL > 0:
         T3 = t1 + t2 + tL
         print ("t3"),T3
@@ -88,12 +98,6 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
     t1 = (-v_max - v1)/-a_max
     t2 = (v2 + v_max)/(a_max)
     tL = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a_max) + (x2-x1)/-v_max
-    # xp1 = -a_max/2*t1**2 + v1*t1 + x1
-    # vp1 = -a_max*t1 + v1
-    # xp2 = -v_max*tL+xp1
-    # xp3 = a_max/2*t2**2 + -v_max*t2 + xp2
-    # vp2 = a_max*t2 + -v_max
-    # print tL, t1, t2, xp1, xp2, xp3, vp2
     if t1 > 0 and t2 > 0 and tL > 0:
         T3 = t1 + t2 + tL
         print ("t3"),T3
@@ -107,15 +111,16 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
     if (T4 < T):
         T = T4
 
-    return T
+    return T # returns T
 
-def min_acc(x1,x2,v1,v2,v_max,T):
+def traj_min_acc(x1,x2,v1,v2,v_max,T):
 
     a1 = 20
     a2 = 20
     a3 = 20
     a4 = 20
     a = 20
+    tSpace = np.linspace(0,T,30)
 
     #P+P-
     sig = 1
@@ -124,8 +129,8 @@ def min_acc(x1,x2,v1,v2,v_max,T):
         ts = 1/2.*(T+(v2-v1)/ap1)
         if ts > 0 and ts < T and v1+ap1*ts < v_max:
             a1 = ap1
-            tpp1 = np.linspace(0,ts,num=10)
-            tpp2 = np.linspace(ts,T,num=10)
+            tpp1 = tSpace[tSpace < ts/T]
+            tpp2 = tSpace[tSpace > ts/T]
             xp1 = a1/2*tpp1**2 + v1*tpp1 + x1
             vp1 = a1*tpp1 + v1
             xp = a1/2*ts**2 + v1*ts + x1
@@ -135,68 +140,122 @@ def min_acc(x1,x2,v1,v2,v_max,T):
 
             xt1 = np.hstack((xp1,xp2[1:]))
             tt1 = np.hstack((tpp1,tpp2[1:]))
-            vt1 = np.hstack((vp1,vp2[1:]))
-            # plt.plot(tt1,xt1)
-            # # plt.close('all')
-
-            # plt.figure()
-            # plt.plot(tpp1,xp1)
-            # plt.hold(True)
-            # plt.plot(tpp2,xp2)
-
-            # plt.figure()
-            # plt.plot(tpp1,vp1)
-            # plt.hold(True)
-            # plt.plot(tpp2,vp2)
-
-            # plt.show(block=False)       
+            vt1 = np.hstack((vp1,vp2[1:]))   
     if ap2 > 0:
         ts = 1/2.*(T+(v2-v1)/ap2)
         if ts > 0 and ts < T and v1+ap2*ts < v_max:
             a1 = ap2
+            tpp1 = tSpace[tSpace < ts/T]
+            tpp2 = tSpace[tSpace > ts/T]
+            xp1 = a1/2*tpp1**2 + v1*tpp1 + x1
+            vp1 = a1*tpp1 + v1
+            xp = a1/2*ts**2 + v1*ts + x1
+            vp = a1*ts + v1
+            xp2 = -a1/2*(tpp2 - ts)**2 + vp*(tpp2-ts) + xp 
+            vp2 = -a1*(tpp2-ts) + vp
+
+            xt1 = np.hstack((xp1,xp2[1:]))
+            tt1 = np.hstack((tpp1,tpp2[1:]))
+            vt1 = np.hstack((vp1,vp2[1:]))   
 
     #P-P+
     sig = -1
-    ap1,ap2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v2-v1)**2)
+    ap1,ap2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v1-v2)**2)
     if ap1 > 0:
-        ts = 1/2.*(T+(v2-v1)/ap1)
+        ts = 1/2.*(T+(v1-v2)/ap1)
         if ts > 0 and ts < T and v1+ap1*ts < v_max:
             a2 = ap1
+            tpp1 = tSpace[tSpace <= ts/T]
+            tpp2 = tSpace[tSpace > ts/T]
+            xp1 = -a2/2*tpp1**2 + v1*tpp1 + x1
+            vp1 = -a2*tpp1 + v1
+            xp = -a2/2*ts**2 + v1*ts + x1
+            vp = -a2*ts + v1
+            xp2 = a2/2*(tpp2 - ts)**2 + vp*(tpp2-ts) + xp 
+            vp2 = a2*(tpp2-ts) + vp
+            xt2 = np.hstack((xp1,xp2))
+            tt2 = np.hstack((tpp1,tpp2))
+            vt2 = np.hstack((vp1,vp2))   
     if ap2 > 0:
-        ts = 1/2.*(T+(v2-v1)/ap2)
+        ts = 1/2.*(T+(v1-v2)/ap2)
         if ts > 0 and ts < T and v1+ap2*ts < v_max:
             a2 = ap2
+            tpp1 = tSpace[tSpace <= ts]
+            tpp2 = tSpace[tSpace > ts]
+            xp1 = -a2/2*tpp1**2 + v1*tpp1 + x1
+            vp1 = -a2*tpp1 + v1
+            xp = -a2/2*ts**2 + v1*ts + x1
+            vp = -a2*ts + v1
+            xp2 = a2/2*(tpp2 - ts)**2 + vp*(tpp2-ts) + xp 
+            vp2 = a2*(tpp2-ts) + vp
+            xt2 = np.hstack((xp1,xp2))
+            tt2 = np.hstack((tpp1,tpp2))
+            vt2 = np.hstack((vp1,vp2)) 
 
     # P+L+P-
-    a = (v_max**2 - v_max*(v1+v2) + .5*(v1**2 + v2**2))/(T*v_max - (x2-x1))
-    t1 = (v_max - v1)/a
-    t2 = (v2 - v_max)/(-a)
-    xp1 = a/2*t1**2 + v1*t1 + x1
-    xp2 = x2 - a/2*t2**2 - v_max*t2
-    tl = (xp2 - xp1)/v_max
-    if t1 > 0 and t2 > 0 and tl > 0:
-        a3 = a
+    a3temp = (v_max**2 - v_max*(v1+v2) + .5*(v1**2 + v2**2))/(T*v_max - (x2-x1))
+    t1 = (v_max - v1)/a3temp
+    t2 = (v2 - v_max)/(-a3temp)
+    tL = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a3temp) + (x2-x1)/v_max
+    if t1 > 0 and t2 > 0 and tL > 0:
+        a3 = a3temp
+        tpp1 = tSpace[tSpace <= t1]
+        tpp2 = tSpace[np.array([c and d for c,d in zip(tSpace >= t1,tSpace <= (t1+tL))])]
+        tpp3 = tSpace[tSpace >= (t1+tL)]
+        xp1 = a/2*tpp1**2 + v1*tpp1 + x1
+        vp1 = a*tpp1 + v1
+        xp1e = a/2*t1**2 + v1*t1 + x1
+        xp2 = v_max*(tpp2-t1)+xp1e
+        xp2e = v_max*(tL) + xp1e
+        vp2 = v_max*np.ones((tpp2.shape[0]))
+        xp3 = -a/2*(tpp3-tL-t1)**2 + v_max*(tpp3-tL-t1) + xp2e
+        vp3 = -a*(tpp3-tL-t1) + v_max
+        xt3 = np.hstack((xp1,xp2,xp3))
+        tt3 = np.hstack((tpp1,tpp2,tpp3))
+        vt3 = np.hstack((vp1,vp2,vp3))
 
-    # P-L-P+
-    a = (-v_max**2 + v_max*(v1+v2) + .5*(v1**2 + v2**2))/(T*-v_max - (x2-x1))
-    t1 = (-v_max - v1)/-a
-    t2 = (v2 + v_max)/(a)
-    xp1 = -a/2*t1**2 + v1*t1 + x1
-    xp2 = x2 + a/2*t2**2 - v_max*t2
-    tl = (xp2 - xp1)/-v_max
-    if t1 > 0 and t2 > 0 and tl > 0:
-        a4 = a
+    #P-L-P+
+    a4temp = (v_max**2 + v_max*(v1+v2) + .5*(v1**2 + v2**2))/(T*-v_max - (x2-x1))
+    a4temp = -a4temp
+    t1 = (-v_max - v1)/-a4temp
+    t2 = (v2 + v_max)/(a4temp)
+    tL = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a4temp) + (x2-x1)/-v_max
+    if t1 > 0 and t2 > 0 and tL > 0:
+        a4 = a4temp
+        tpp1 = tSpace[tSpace <= t1]
+        tpp2 = tSpace[np.array([c and d for c,d in zip(tSpace >= t1,tSpace <= (t1+tL))])]
+        tpp3 = tSpace[tSpace >= (t1+tL)]
+        xp1 = -a/2*tpp1**2 + v1*tpp1 + x1
+        vp1 = -a*tpp1 + v1
+        xp1e = -a/2*t1**2 + v1*t1 + x1
+        xp2 = -v_max*(tpp2-t1)+xp1e
+        xp2e = -v_max*(tL) + xp1e
+        vp2 = -v_max*np.ones((tpp2.shape[0]))
+        xp3 = a/2*(tpp3-tL-t1)**2 + -v_max*(tpp3-tL-t1) + xp2e
+        vp3 = a*(tpp3-tL-t1) + -v_max
+        xt4 = np.hstack((xp1,xp2,xp3))
+        tt4 = np.hstack((tpp1,tpp2,tpp3))
+        vt4 = np.hstack((vp1,vp2,vp3))
 
     if (a1 < a):
-        traj = traj1
+        time = tt1
+        pos = xt1
+        vel = vt1
     if (a2 < a):
-        traj = traj2
+        time = tt2
+        pos = xt2
+        vel = vt2
     if (a3 < a):
-        traj = traj3
+        time = tt3
+        pos = xt3
+        vel = vt3
     if (a4 < a):
-        traj = traj4
+        time = tt3
+        pos = xt3
+        vel = vt3
 
-    return traj
+    return time, pos, vel 
+    # returns time, pos, vel paths
 
 def quad_solve(a,b,c):
     if b**2 - 4*a*c > 0:
