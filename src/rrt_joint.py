@@ -37,7 +37,7 @@ def find_path(plot):
     robot = URDF.from_parameter_server()
     base_link = robot.get_root()
     kdl_kin = KDLKinematics(robot, base_link, 'right_gripper_base')
-    thInit = np.array([0,0,0,0,0,0,0])
+    thInit = q_start
     seed = 0
     q_ik = kdl_kin.inverse(X, thInit)
     while q_ik == None:

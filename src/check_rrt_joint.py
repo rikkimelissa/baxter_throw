@@ -20,6 +20,7 @@ class Checker(object):
         self._pub_path = rospy.Publisher('joint_path',numpy_msg(Float32MultiArray), queue_size = 10)
         self._pub_traj = rospy.Publisher('joint_traj',numpy_msg(Float32MultiArray), queue_size = 10)
         self._iter = 0
+        self._executing = True
 
     def sub_cb(self,a):
         rospy.loginfo(a)
@@ -40,7 +41,9 @@ class Checker(object):
                     self._iter += 1
                     self.smooth_path()
                 else:
+                    print "sent to publish"
                     self.publish_traj()
+                    self._executing = False
 
     def publish_traj(self):
         a = Float32MultiArray()
@@ -107,13 +110,17 @@ class Checker(object):
         else:
             print "sent to publish"
             self.publish_traj()
+            self._executing = False
 
     def smooth_path(self):
         path_length = self._traj.shape[0]
         if (path_length == 0):
             self.publish_traj()
         else:
-            self._ind1 = round(random()*(path_length-1))
+            if self._iter == 1:
+                self._ind1 = 0
+            else:
+                self._ind1 = round(random()*(path_length-1))
             self._ind2 = round(random()*(path_length-1))
             if (self._ind1 > self._ind2):
                 temp = self._ind1;
@@ -130,7 +137,9 @@ class Checker(object):
                 if self._iter < 30:
                     self.smooth_path()
                 else:
-                    self.publish_traj()    
+                    print "sent to publish"
+                    self.publish_traj()
+                    self._executing = False    
 
 def main():
 
@@ -140,16 +149,8 @@ def main():
     check._path = find_path(False)
     check.publish_joints()
 
-
-
-
-
-
-
-
-
-    rospy.spin()
-
+    while(check._executing):
+        rospy.spin()
     
 if __name__ == "__main__":
     try:

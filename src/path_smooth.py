@@ -19,7 +19,7 @@ def main():
     plt.figure()
     plt.plot(traj[:,0],traj[:,9:])
     plt.show(block=False)
-    iter = 10
+    iter = 30
     for i in range(iter):
         print i
         path_length = traj.shape[0]
@@ -35,14 +35,15 @@ def main():
             vertex1 = traj[ind1,:]
             vertex2 = traj[ind2,:]
             s = shortcut(vertex1,vertex2)
-            if (collision_free(s)):
+            # if (collision_free(s)):
             # replace segment in path
-                old_dur = vertex2[0] - vertex1[0]
-                new_dur = s[-1,0] - s[0,0]
-                if new_dur < old_dur:
-                    traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
-                    traj[ind1:,0] += new_dur - old_dur
-                    traj = np.insert(traj,ind1,s,0)
+            old_dur = vertex2[0] - vertex1[0]
+            new_dur = s[-1,0] - s[0,0]
+            if new_dur < old_dur:
+                print new_dur, old_dur, ind1, ind2
+                traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
+                traj[ind1:,0] += new_dur - old_dur
+                traj = np.insert(traj,ind1,s,0)
     plt.figure()
     plt.plot(traj[:,0],traj[:,1:8])
     plt.show(block=False)
@@ -140,7 +141,7 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
     ap1,ap2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v1-v2)**2)
     if ap1 > 0:
         ts = 1/2.*(T+(v2-v1)/ap1)
-        if ts > 0 and ts < T and v1+ap1*ts < (v_max + .05):
+        if ts > 0 and ts < (T + .05) and v1+ap1*ts < (v_max + .05):
             a1 = ap1
             tpp1 = tSpace[tSpace < ts]
             tpp2 = tSpace[tSpace > ts]
@@ -156,7 +157,7 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
             vt1 = np.hstack((vp1,vp2))   
     if ap2 > 0:
         ts = 1/2.*(T+(v2-v1)/ap2)
-        if ts > 0 and ts < T and v1+ap2*ts < (v_max + .05):
+        if ts > 0 and ts < (T + .05) and v1+ap2*ts < (v_max + .05):
             a1 = ap2
             tpp1 = tSpace[tSpace < ts]
             tpp2 = tSpace[tSpace > ts]
@@ -177,7 +178,7 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
     if ap1 > 0:
         ts = 1/2.*(T+(v1-v2)/ap1)
         # print ('P-P+'),v1-ap1*ts
-        if ts > 0 and ts < T and v1-ap1*ts > (-v_max - .05):
+        if ts > 0 and ts < (T + .05) and v1-ap1*ts > (-v_max - .05):
             a2 = ap1
             tpp1 = tSpace[tSpace <= ts]
             tpp2 = tSpace[tSpace > ts]
@@ -193,7 +194,7 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
     if ap2 > 0:
         ts = 1/2.*(T+(v1-v2)/ap2)
         # print ('P-P+'), v1-ap2*ts
-        if ts > 0 and ts < T and v1-ap2*ts > (-v_max - .05):
+        if ts > 0 and ts < (T + .05) and v1-ap2*ts > (-v_max - .05):
             a2 = ap2
             tpp1 = tSpace[tSpace <= ts]
             tpp2 = tSpace[tSpace > ts]
@@ -253,10 +254,6 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         vt4 = np.hstack((vp1,vp2,vp3))
 
     # print a1, a2, a3, a4
-
-    time = np.linspace(0,20,30)
-    pos = np.linspace(0,T,30)
-    vel = np.linspace(0,T,30)
 
     if (a1 < a):
         time = tt1
