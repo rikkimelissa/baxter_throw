@@ -32,8 +32,10 @@ def main():
     for i in range(iter):
         print i
         path_length = traj.shape[0]
-        ind1 = round(random()*path_length)
-        ind2 = round(random()*path_length)
+        if (path_length == 0):
+            break
+        ind1 = round(random()*(path_length-1))
+        ind2 = round(random()*(path_length-1))
         if (ind1 > ind2):
             temp = ind1;
             ind1 = ind2;
@@ -44,10 +46,10 @@ def main():
             s = shortcut(vertex1,vertex2)
             # if (collision_free(s)):
             # replace segment in path
-            traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
             old_dur = vertex2[0] - vertex1[0]
             new_dur = s[-1,0] - s[0,0]
             if new_dur < old_dur:
+                traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
                 traj[ind1:,0] += new_dur - old_dur
                 traj = np.insert(traj,ind1,s,0)
                 plt.figure()
@@ -65,7 +67,7 @@ def shortcut(vertex1, vertex2):
     # plt.figure(2)
     # plt.plot(np.vstack((vertex1[8:],vertex2[8:])),'.')    
     for i in range(7):
-        print i
+        # print i
         if i > 3:
             v_max = 4.0
         t = execution_time(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,a_max)
@@ -104,19 +106,19 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
     tp1, tp2 = quad_solve(a_max, 2*v1, (v1-v2)*(v1+v2)/(2*a_max) + x1 - x2)
     if tp1 >= 0 and tp1 > (v2-v1)/a_max and v1+tp1*a_max < v_max:
         T1 = 2*tp1 + (v1-v2)/a_max 
-        print ("t1"), T1
+        # print ("t1"), T1
     if tp2 > 0 and tp2 > (v2-v1)/a_max and v1+tp2*a_max < v_max:
         T1 = 2*tp2 + (v1-v2)/a_max 
-        print ("t1"),T1
+        # print ("t1"),T1
 
     # P-P+
     tp1, tp2 = quad_solve(-a_max, 2*v1, (v1-v2)*(v1+v2)/(2*-a_max) + x1 - x2)
     if tp1 > 0 and tp1 > (v2-v1)/-a_max and v1+tp1*-a_max > -v_max:
         T2 = 2*tp2 + (v1-v2)/-a_max
-        print ("t2"),T2
+        # print ("t2"),T2
     if tp2 > 0 and tp2 > (v2-v1)/-a_max and v1+tp2*-a_max > -v_max:
         T2 = 2*tp2 + (v1-v2)/-a_max
-        print ("t2"),T2
+        # print ("t2"),T2
 
     # P+L+P-
     t1 = (v_max - v1)/a_max
@@ -124,7 +126,7 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
     tL = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a_max) + (x2-x1)/v_max
     if t1 > 0 and t2 > 0 and tL > 0:
         T3 = t1 + t2 + tL
-        print ("t3"),T3
+        # print ("t3"),T3
 
     # P-L-P+
     t1 = (-v_max - v1)/-a_max
@@ -132,7 +134,7 @@ def execution_time(x1,x2,v1,v2,v_max,a_max):
     tL = (v2**2 + v1**2 - 2*v_max**2)/(2*v_max*a_max) + (x2-x1)/-v_max
     if t1 > 0 and t2 > 0 and tL > 0:
         T4 = t1 + t2 + tL
-        print ("t4"),T4
+        # print ("t4"),T4
 
     if (T1 < T):
         T = T1
