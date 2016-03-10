@@ -38,7 +38,10 @@ class Checker(object):
                 self.replace_segment()
             else:
                 if self._iter < 30:
-                    self._iter += 1
+                    if (self._iter == 1 or self._iter == 2):
+                        pass
+                    else:
+                        self._iter += 1
                     self.smooth_path()
                 else:
                     print "sent to publish"
@@ -56,7 +59,7 @@ class Checker(object):
         plt.plot(self._traj[:,0],self._traj[:,8:],'.')
         plt.show(block=False)
         rospy.loginfo('publishing traj')
-        self._pub_traj.publish(a)    
+        # self._pub_traj.publish(a)    
 
     def publish_path(self):
         a = Float32MultiArray()
@@ -105,6 +108,8 @@ class Checker(object):
             # plt.plot(self._traj[:,0],self._traj[:,1:8])
             # plt.plot(self._traj[:,0],self._traj[:,8:])
             # plt.show(block=False)
+        else:
+            self._iter -=1
         if self._iter < 30:
             print "smoothing next segment"
             self._iter += 1
@@ -122,11 +127,13 @@ class Checker(object):
             if self._iter == 1:
                 print "chose the first"
                 self._ind1 = 0
-                self._ind2 = round(random()*(path_length-2)) + 1
+                self._ind2 = round(random()*(path_length-50)) + 49
+                print self._ind1, self._ind2
             elif self._iter == 2:
                 print "chose the last"
-                self._ind1 = round(random()*(path_length-2)) - 1
+                self._ind1 = round(random()*(path_length-50))
                 self._ind2 = path_length - 1
+                print self._ind1, self._ind2
             else:
                 self._ind1 = round(random()*(path_length-1))
                 self._ind2 = round(random()*(path_length-1))
