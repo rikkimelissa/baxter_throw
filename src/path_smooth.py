@@ -16,19 +16,10 @@ def main():
     plt.figure()
     plt.plot(traj[:,0],traj[:,1:8],'.')
     plt.show(block=False)
-    # plt.hold(True)
-    # plt.plot(path_orig[:,0], path_orig[:,1:8], marker='o');
     plt.figure()
-    plt.plot(traj[:,0],traj[:,9:],'.')
-
-    plt.figure()
-    plt.plot(traj1[:,0],traj1[:,1:8],'.')
-    plt.figure()
-    plt.plot(traj1[:,0],traj1[:,9:],'.')
-    # plt.hold(True)
-    # plt.plot(path_orig[:,0], path_orig[:,9:], marker='o');
+    plt.plot(traj[:,0],traj[:,9:])
     plt.show(block=False)
-    iter = 30
+    iter = 10
     for i in range(iter):
         print i
         path_length = traj.shape[0]
@@ -52,9 +43,12 @@ def main():
                 traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
                 traj[ind1:,0] += new_dur - old_dur
                 traj = np.insert(traj,ind1,s,0)
-                plt.figure()
-                plt.plot(traj[:,0],traj[:,1:8],'.')
-                plt.show(block=False)
+    plt.figure()
+    plt.plot(traj[:,0],traj[:,1:8])
+    plt.show(block=False)
+    plt.figure()
+    plt.plot(traj[:,0],traj[:,8:])
+    plt.show(block=False)
 
 
 def shortcut(vertex1, vertex2):
@@ -88,11 +82,6 @@ def shortcut(vertex1, vertex2):
     #     plt.figure(2)
     #     plt.plot(s[:,0], s[:,i+7])
     # plt.show(block=False)
-
-
-
-
-
 
 def execution_time(x1,x2,v1,v2,v_max,a_max):
 
@@ -197,6 +186,7 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
     ap1,ap2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v1-v2)**2)
     if ap1 > 0:
         ts = 1/2.*(T+(v1-v2)/ap1)
+        print ('P-P+'),v1-ap1*ts
         if ts > 0 and ts < T and v1-ap1*ts > (-v_max - .05):
             a2 = ap1
             tpp1 = tSpace[tSpace <= ts]
@@ -212,6 +202,7 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
             vt2 = np.hstack((vp1,vp2))   
     if ap2 > 0:
         ts = 1/2.*(T+(v1-v2)/ap2)
+        print ('P-P+'), v1-ap2*ts
         if ts > 0 and ts < T and v1-ap2*ts > (-v_max - .05):
             a2 = ap2
             tpp1 = tSpace[tSpace <= ts]
@@ -277,18 +268,22 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         time = tt1
         pos = xt1
         vel = vt1
+        a = a1
     if (a2 < a):
         time = tt2
         pos = xt2
         vel = vt2
+        a = a2
     if (a3 < a):
         time = tt3
         pos = xt3
         vel = vt3
+        a = a3
     if (a4 < a):
         time = tt4
         pos = xt4
         vel = vt4
+        a = a4
 
     # print a, T
 
@@ -366,14 +361,14 @@ def path2traj(path):
 
  
 
-                color = colors[i]
-                plt.figure(1)
-                plt.hold(True)
-                plt.plot(tSpace,jP,'-'+color,label='Joint '+str(i))     
-                plt.figure(2)
-                plt.hold(True)
-                plt.plot(tSpace,jV,'-'+color,label='Joint '+str(i))
-                plt.show(block=False)
+                # color = colors[i]
+                # plt.figure(1)
+                # plt.hold(True)
+                # plt.plot(tSpace,jP,'-'+color,label='Joint '+str(i))     
+                # plt.figure(2)
+                # plt.hold(True)
+                # plt.plot(tSpace,jV,'-'+color,label='Joint '+str(i))
+                # plt.show(block=False)
 
         traj_comp[9*ind:9*ind+9,0] = tSpace[:-1] + t_delay
         path_orig[ind,0] = t_delay    
@@ -386,7 +381,7 @@ def path2traj(path):
 
 if __name__ == "__main__":
     try:
-        x=1
+        main()
     except rospy.ROSInterruptException:
         pass
 
