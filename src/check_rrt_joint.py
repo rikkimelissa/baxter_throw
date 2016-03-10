@@ -9,6 +9,8 @@ from urdf_parser_py.urdf import URDF
 from pykdl_utils.kdl_kinematics import KDLKinematics
 from functions import RpToTrans
 import matplotlib.pyplot as plt
+from path_smooth import shortcut, path2traj
+from random import random
 
 class Checker(object):
     def __init__(self):
@@ -16,15 +18,40 @@ class Checker(object):
         self._pub_joints = rospy.Publisher('joint_state_check', numpy_msg(Float32MultiArray), queue_size = 10)
         self._sub = rospy.Subscriber('collision_check', Int16, self.sub_cb)
         self._pub_path = rospy.Publisher('joint_path',numpy_msg(Float32MultiArray), queue_size = 10)
+        self._pub_traj = rospy.Publisher('joint_traj',numpy_msg(Float32MultiArray), queue_size = 10)
+        self._iter = 0
 
     def sub_cb(self,a):
         rospy.loginfo(a)
-        if (a.data):
-            rospy.loginfo('Sending path')
-            self.publish_path()
+        if self._iter == 0:
+            if (a.data):
+                rospy.loginfo('RRT path checked')
+                self._iter = 1;
+                self.smooth_path()
+            else:
+                rospy.loginfo('Calculating new path')
+                self.find_new_path()
         else:
-            rospy.loginfo('Calculating new path')
-            self.find_new_path()
+            if (a.data):
+                self.replace_segment()
+            else:
+                if self._iter < 10:
+                    self._iter += 1
+                    self.smooth_path()
+                else:
+                    self.publish_traj()
+
+    def publish_traj(self):
+        a = Float32MultiArray()
+        N = self._traj.shape[0]
+        data = np.reshape(self._traj,(N*15,1))
+        a.data = np.array(data, dtype = np.float32)
+        plt.figure()
+        plt.plot(self_.traj[:,0],self._traj[:,1:8])
+        plt.plot(self._traj[:,0],self._traj[:,8:])
+        plt.show(block=False)
+        rospy.loginfo('publishing traj')
+        self._pub_traj.publish(a)    
 
     def publish_path(self):
         a = Float32MultiArray()
@@ -49,6 +76,49 @@ class Checker(object):
         rospy.loginfo('checking collision')
         self._pub_joints.publish(a)   
 
+    def publish_segment(self):
+        a = Float32MultiArray()
+        thList_arms = np.hstack((self._segment[1:8], np.zeros((1,7))[0]))
+        thList_all = np.hstack((np.array([0]),thList_arms))
+        data = np.reshape(thList_all,(15,1))
+        a.data = np.array(data, dtype = np.float32)
+        rospy.loginfo('checking segment')
+        self._pub_joints.publish(a)  
+
+    def replace_segment(self):
+        print "Segment ", str(self._iter), " smoothed"
+        old_dur = self._vertex2[0] - self._vertex1[0]
+        new_dur = self._s[-1,0] - self._s[0,0]
+        if new_dur < old_dur:
+            self._traj = np.delete(self._traj,range(int(self._ind1),int(self._ind2+1)),0)
+            self._traj[self._ind1:,0] += new_dur - old_dur
+            self._traj = np.insert(self._traj,self._ind1,self._s,0)
+        if self._iter < 10:
+            self._iter += 1
+            self.smooth_path()
+        else:
+            self.publish_traj()
+
+    def smooth_path(self):
+        self._traj, path_orig = path2traj(self._path)
+        path_length = self._traj.shape[0]
+        if (path_length == 0):
+            self.publish_traj()
+        else:
+            self._ind1 = round(random()*(path_length-1))
+            self._ind2 = round(random()*(path_length-1))
+            if (self._ind1 > self._ind2):
+                temp = self._ind1;
+                self._ind1 = self._ind2;
+                self._ind2 = temp
+            if (self._ind1 != self._ind2):
+                self._vertex1 = self._traj[self._ind1,:]
+                self._vertex2 = self._traj[self._ind2,:]
+                self._s = shortcut(self._vertex1,self._vertex2)
+                midpoint_s = self._s[self._s.shape[0]/2,:]
+                self._segment = midpoint_s
+                self.publish_segment()      
+
 def main():
 
     rospy.init_node('jsc_publisher')
@@ -56,6 +126,14 @@ def main():
     check = Checker()
     check._path = find_path(False)
     check.publish_joints()
+
+
+
+
+
+
+
+
 
     rospy.spin()
 

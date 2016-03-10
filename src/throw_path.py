@@ -36,6 +36,9 @@ from solve_linear_system import linearSpace
 from std_msgs.msg import Float32MultiArray
 from rospy.numpy_msg import numpy_msg
 
+import matplotlib.pyplot as plt
+
+
 class Trajectory(object):
     def __init__(self, limb):
         ns = 'robot/limb/' + limb + '/'
@@ -53,7 +56,8 @@ class Trajectory(object):
                          " before running example.")
             rospy.signal_shutdown("Timed out waiting for Action Server")
             sys.exit(1)
-        self._sub = rospy.Subscriber('joint_path', numpy_msg(Float32MultiArray), self.path_cb)
+        self._sub_path = rospy.Subscriber('joint_path', numpy_msg(Float32MultiArray), self.path_cb)
+        self._sub_traj = rospy.Subscriber('joint_traj', numpy_msg(Float32MultiArray), self.traj_cb)
         self._limb_interface = baxter_interface.limb.Limb('right')
         self._q_start = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
        -1.16889336, -0.90888362])
@@ -105,9 +109,25 @@ class Trajectory(object):
         pMat = np.reshape(pList,(pList.shape[0]/14,14))
         self._pArm = pMat[:,0:7]
         self._vArm = pMat[:,7:14]
-        self.execute()
+        self.execute_path()
 
-    def execute(self):
+    def traj_cb(self,a):
+        rospy.loginfo('Received trajectory')
+        pList = a.data;
+        pMat = np.reshape(pList,(pList.shape[0]/15,15))
+        self._time = pMat[:,0]
+        self._pArm = pMat[:,1:8]
+        self._vArm = pMat[:,8:]
+
+        plt.figure()
+        plt.hold(True)
+        plt.plot(self._time, self._pArm)
+        plt.plot(self._time, self._vArm)
+        plt.show(block=False)
+        
+        self.execute_traj()    
+
+    def execute_path(self):
         N = self._pArm.shape[0]
         T = 10
         t_all = np.linspace(0 + self._t_delay,T + self._t_delay, N);
@@ -123,6 +143,19 @@ class Trajectory(object):
         self.wait(10)
         self.clear('right')
 
+    def execute_traj(self):
+        N = self._pArm.shape[0]
+
+        current_angles = [self._limb_interface.joint_angle(joint) for joint in self._limb_interface.joint_names()]
+        self.add_point_p(current_angles, 0.0)
+        self.add_point_p(self._q_start,self._t_delay)
+
+        for i in range(N):
+            self.add_point_pv(self._pArm[i,:].tolist(), self._vArm[i,:].tolist(),self._time[i]+self._t_delay+1)
+        # traj.add_point_p(thList[i,:].tolist(), t_all[i])
+        self.start()
+        self.wait(10)
+        self.clear('right')
 
 def main():
 

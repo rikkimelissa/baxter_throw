@@ -35,14 +35,14 @@ def main():
             vertex1 = traj[ind1,:]
             vertex2 = traj[ind2,:]
             s = shortcut(vertex1,vertex2)
-            # if (collision_free(s)):
+            if (collision_free(s)):
             # replace segment in path
-            old_dur = vertex2[0] - vertex1[0]
-            new_dur = s[-1,0] - s[0,0]
-            if new_dur < old_dur:
-                traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
-                traj[ind1:,0] += new_dur - old_dur
-                traj = np.insert(traj,ind1,s,0)
+                old_dur = vertex2[0] - vertex1[0]
+                new_dur = s[-1,0] - s[0,0]
+                if new_dur < old_dur:
+                    traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
+                    traj[ind1:,0] += new_dur - old_dur
+                    traj = np.insert(traj,ind1,s,0)
     plt.figure()
     plt.plot(traj[:,0],traj[:,1:8])
     plt.show(block=False)
@@ -51,17 +51,13 @@ def main():
     plt.show(block=False)
 
 
+
 def shortcut(vertex1, vertex2):
     a_max = 4.0
     v_max = 2.0
     T = 0
-    s = np.zeros((30,15))
-    # plt.figure(1)
-    # plt.plot(np.vstack((vertex1[1:8],vertex2[1:8])),'.')
-    # plt.figure(2)
-    # plt.plot(np.vstack((vertex1[8:],vertex2[8:])),'.')    
+    s = np.zeros((30,15)) 
     for i in range(7):
-        # print i
         if i > 3:
             v_max = 4.0
         t = execution_time(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,a_max)
@@ -74,18 +70,8 @@ def shortcut(vertex1, vertex2):
         time, pos, vel = traj_min_acc(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,T)
         s[:,i+1] = pos
         s[:,i+8] = vel
-        # plt.figure()
-        # plt.plot(time,pos)
-        # plt.plot(time,vel)
-        # plt.show(block=False)
     s[:,0] = time + vertex1[0]
     return s
-    # for i in range(7):
-    #     plt.figure(1)
-    #     plt.plot(s[:,0], s[:,i+1])
-    #     plt.figure(2)
-    #     plt.plot(s[:,0], s[:,i+7])
-    # plt.show(block=False)
 
 def execution_time(x1,x2,v1,v2,v_max,a_max):
 
@@ -289,12 +275,6 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         vel = vt4
         a = a4
 
-    # print a, T
-
-    # if (a == 20):
-    #     T += .05
-    #     time, pos, vel = traj_min_acc(x1,x2,v1,v2,v_max,T)
-
     return time, pos, vel 
     # returns time, pos, vel paths
 
@@ -362,23 +342,9 @@ def path2traj(path):
                 traj_comp[9*ind:9*ind+9,i+8] = jV[:-1]  
                 # print ('Met')
 
-
- 
-
-                # color = colors[i]
-                # plt.figure(1)
-                # plt.hold(True)
-                # plt.plot(tSpace,jP,'-'+color,label='Joint '+str(i))     
-                # plt.figure(2)
-                # plt.hold(True)
-                # plt.plot(tSpace,jV,'-'+color,label='Joint '+str(i))
-                # plt.show(block=False)
-
         traj_comp[9*ind:9*ind+9,0] = tSpace[:-1] + t_delay
         path_orig[ind,0] = t_delay    
 
-        # traj = JointTrajectory(vertex1, vertex2, T, 10, 3)
-        # time = np.linspace(t_delay,t_delay + T, 10);
         ind += 1;
         t_delay += T;
     return traj_comp, path_orig
@@ -389,15 +355,3 @@ if __name__ == "__main__":
     except rospy.ROSInterruptException:
         pass
 
-
-# Step 3-5: Selects two random states
-# Step 6: Computes time-optimal interpolant, IV-B
-# Step 7: Tests for collisions, IV-E
-# Step 8: Path splicing
-
-# f(x,v,vmax, amax) = time of the interpolant between x1 and x2
-# g(x,v,vmax,T,t) = state at time t of T
-
-# 1) compute optimal time = max of times for joints. For each joint, min of 4 primitives
-# 2) Find acceleration of each trajectory
-# 3) Pick min-acceleration trajectory
