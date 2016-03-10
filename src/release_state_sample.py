@@ -84,4 +84,7 @@ def find_velocity_param(dx,dy,dz, rand):
             alpha_list.append(alpha)
             v_list.append(v)
             inc += 1 
-            return alpha, v
+            return v, alpha
+
+if __name__ == '__main__':
+    plot_results()

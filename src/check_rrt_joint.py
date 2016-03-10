@@ -51,9 +51,9 @@ class Checker(object):
         data = np.reshape(self._traj,(N*15,1))
         a.data = np.array(data, dtype = np.float32)
         plt.figure()
-        plt.plot(self._traj[:,0],self._traj[:,1:8])
+        plt.plot(self._traj[:,0],self._traj[:,1:8],'.')
         plt.figure()
-        plt.plot(self._traj[:,0],self._traj[:,8:])
+        plt.plot(self._traj[:,0],self._traj[:,8:],'.')
         plt.show(block=False)
         rospy.loginfo('publishing traj')
         self._pub_traj.publish(a)    
@@ -79,7 +79,9 @@ class Checker(object):
         a.data = np.array(data, dtype = np.float32)
         rospy.loginfo(self._path.shape)
         rospy.loginfo('checking collision')
+        rospy.loginfo(a)
         self._pub_joints.publish(a)   
+        print ('published')
 
     def publish_segment(self):
         a = Float32MultiArray()
@@ -118,10 +120,16 @@ class Checker(object):
             self.publish_traj()
         else:
             if self._iter == 1:
+                print "chose the first"
                 self._ind1 = 0
+                self._ind2 = round(random()*(path_length-2)) + 1
+            elif self._iter == 2:
+                print "chose the last"
+                self._ind1 = round(random()*(path_length-2)) - 1
+                self._ind2 = path_length - 1
             else:
                 self._ind1 = round(random()*(path_length-1))
-            self._ind2 = round(random()*(path_length-1))
+                self._ind2 = round(random()*(path_length-1))
             if (self._ind1 > self._ind2):
                 temp = self._ind1;
                 self._ind1 = self._ind2;

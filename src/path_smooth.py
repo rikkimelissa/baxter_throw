@@ -25,6 +25,19 @@ def main():
         path_length = traj.shape[0]
         # if (path_length == 0):
         #     break
+        if i == 1:
+            print "chose the first"
+            ind1 = 0
+            ind2 = round(random()*(path_length-2)) + 1
+        elif i == 2:
+            print "chose the last"
+            ind1 = round(random()*(path_length-2)) - 1
+            ind2 = path_length - 1
+        else:
+            ind1 = round(random()*(path_length-1))
+            ind2 = round(random()*(path_length-1))
+
+
         ind1 = round(random()*(path_length-1))
         ind2 = round(random()*(path_length-1))
         if (ind1 > ind2):
@@ -54,20 +67,20 @@ def main():
 
 
 def shortcut(vertex1, vertex2):
-    a_max = 4.0
-    v_max = 2.0
+    a_max = 3.0
+    v_max = 1.5
     T = 0
-    s = np.zeros((30,15)) 
+    s = np.zeros((60,15)) 
     for i in range(7):
         if i > 3:
-            v_max = 4.0
+            v_max = 3.0
         t = execution_time(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,a_max)
         if t > T:
             T = t
-    v_max = 2.0
+    v_max = 1.5
     for i in range(7):
         if i > 3:
-            v_max = 4.0
+            v_max = 3.0
         time, pos, vel = traj_min_acc(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,T)
         s[:,i+1] = pos
         s[:,i+8] = vel
@@ -134,7 +147,7 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
     a3 = 20
     a4 = 20
     a = 20
-    tSpace = np.linspace(0,T,30)
+    tSpace = np.linspace(0,T,60)
 
     #P+P-
     sig = 1
@@ -299,11 +312,11 @@ def path2traj(path):
         T = 0;
         # Find shortest time so that vel/acc limits are met
         for i in range(7):
-            a_max = 4
+            a_max = 3.0
             if i < 4:
-                v_max = 2
+                v_max = 1.5
             else:
-                v_max = 4
+                v_max = 3.0
             p1 = vertex1[i];
             p2 = vertex2[i];
             v1 = vertex1[i+7];
@@ -332,9 +345,9 @@ def path2traj(path):
                 jV = jointVelocity(tSpace,coeff)
 
                 if i < 4:
-                    v_max = 2
+                    v_max = 1.5
                 else:
-                    v_max = 4
+                    v_max = 3.0
                 if abs(jV).max() > v_max or abs(np.diff(jV)).max()*(tSpace[1]-tSpace[0]) > a_max:
                     # print ('increasing T')
                     T *= 1.5                    

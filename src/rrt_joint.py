@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import atan2, sin, cos
 import time
-from release_state_sample import test_pos
+from release_state_solve import find_feasible_release
 from urdf_parser_py.urdf import URDF
 from pykdl_utils.kdl_kinematics import KDLKinematics
 from functions import RpToTrans
@@ -22,9 +22,7 @@ def find_path(plot):
        -1.16889336, -0.90888362])
 
     # Find goal for throwing
-    pos_goal = test_pos(catch_x, catch_y, catch_z)
-    while pos_goal == None:
-        pos_goal = test_pos(catch_x, catch_y, catch_z)
+    pos_goal = find_feasible_release(catch_x, catch_y, catch_z)
 
     # Add rotation to position and convert to rotation matrix    
     R = np.array([[-0.11121663, -0.14382586,  0.98333361],
@@ -118,14 +116,15 @@ def build_tree(iter,treeA, treeB ,edgesA, edgesB, plot, kdl_kin):
     i = 0
     while i < iter:
 
-        jointsA = np.random.rand(1,7)[0]*[3.4033, 3.194, 6.1083, 2.67, 6.117, 3.6647, 6.117] - [1.7016, 2.147, 3.05, .05, 3.059, 1.57, 3.059]
-        velA = np.random.rand(1,7)[0]*[4,4,4,4,8,8,8] - [2,2,2,2,4,4,4]
+        # jointsA = np.random.rand(1,7)[0]*[3.4033, 3.194, 6.1083, 2.67, 6.117, 3.6647, 6.117] - [1.7016, 2.147, 3.05, .05, 3.059, 1.57, 3.059]
+        jointsA = np.random.rand(1,7)[0]*[2.5, 2.5, 4, 1.5, 4, 2.5, 4] - [1.25, 1.25, 2.0, .75, 2.0, 1.25, 2.0]
+        velA = np.random.rand(1,7)[0]*[3.0,3.0,3.0,3.0,6.0,6.0,6.0] - [1.5,1.5,1.5,1.5,2,2,2]
         node = nearest_neighbor(jointsA, velA, treeA, i)
         treeA = insert_vertex(node,treeA,jointsA,velA,i,1)
         edgesA = insert_edge(edgesA, node, i)
 
-        jointsB = np.random.rand(1,7)[0]*[3.4033, 3.194, 6.1083, 2.67, 6.117, 3.6647, 6.117] - [1.7016, 2.147, 3.05, .05, 3.059, 1.57, 3.059]
-        velB = np.random.rand(1,7)[0]*[4,4,4,4,8,8,8] - [2,2,2,2,4,4,4]
+        jointsB = np.random.rand(1,7)[0]*[2.5, 2.5, 4, 1.5, 4, 2.5, 4] - [1.25, 1.25, 2.0, .75, 2.0, 1.25, 2.0]
+        velB = np.random.rand(1,7)[0]*[3.0,3.0,3.0,3.0,6.0,6.0,6.0] - [1.5,1.5,1.5,1.5,2,2,2]
         node = nearest_neighbor(jointsB, velB, treeB, i)
         treeB = insert_vertex(node,treeB,jointsB,velB,i,1)
         edgesB = insert_edge(edgesB, node, i)

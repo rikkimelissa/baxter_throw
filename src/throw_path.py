@@ -147,6 +147,7 @@ class Trajectory(object):
     def execute_traj(self):
         N = self._pArm.shape[0]
 
+        rospy.loginfo('executing trajectory')
         current_angles = [self._limb_interface.joint_angle(joint) for joint in self._limb_interface.joint_names()]
         self.add_point_p(current_angles, 0.0)
         self.add_point_p(self._q_start,self._t_delay)
@@ -154,6 +155,8 @@ class Trajectory(object):
         for i in range(N):
             self.add_point_pv(self._pArm[i,:].tolist(), self._vArm[i,:].tolist(),self._time[i]+self._t_delay+1)
         # traj.add_point_p(thList[i,:].tolist(), t_all[i])
+
+        # self.add_point_p(self._pArm[-1,:],self._t_delay + 5)
         self.start()
         self.wait(10)
         self.clear('right')

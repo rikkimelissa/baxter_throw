@@ -6,11 +6,25 @@ import numpy as np
 from urdf_parser_py.urdf import URDF
 from pykdl_utils.kdl_kinematics import KDLKinematics
 from math import sin, cos
+import matplotlib.pyplot as plt
 
 catch_x = .68
 catch_z = -.6 # range from - .5 to 0 # lower range determined by baxter
 catch_y = .7 # range from .29 to .5, works after .5 but hard to find solutions
 
+def main():
+    throw_y, throw_z, vel, alpha = find_feasible_release(catch_x, catch_y, catch_z)
+    print throw_y, throw_z, vel, alpha
+    block_width = .047
+    dy = catch_y - throw_y - block_width
+    t = np.linspace(0,dy/(vel*cos(alpha)),100)
+    traj_y = vel*cos(alpha)*t + throw_y;
+    traj_z = -.5*9.8*t**2 + vel*sin(alpha)*t + throw_z
+    plt.close('all')
+    plt.figure()
+    plt.plot(traj_y,traj_z,'.')
+    plt.ylim([-.7, .4])
+    plt.show(block=False)
 
 def find_feasible_release(catch_x, catch_y, catch_z):
     found = False;
@@ -63,10 +77,12 @@ def test_joint_vel(q_ik, vel, alpha, kdl_kin):
     Vb = np.array([0,0,0,0,v_y,v_z])
     q_dot_throw = inv_jac.dot(Vb)
     for i in range(4):
-        if q_dot_throw[0,i] > 2.0 or q_dot_throw[0,i] < -2.0:
+        if q_dot_throw[0,i] > 1.5 or q_dot_throw[0,i] < -1.5:
             return False
     for i in range(3):
-        if q_dot_throw[0,i+4] > 4.0 or q_dot_throw[0,i+4] < -4.0:
+        if q_dot_throw[0,i+4] > 3.0 or q_dot_throw[0,i+4] < -3.0:
             return False
     return True
 
+if __name__ == '__main__':
+    main()

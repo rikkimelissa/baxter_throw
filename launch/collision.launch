@@ -65,6 +65,6 @@
   </group>
 
   <!-- start nodes -->
-  <node name="throw" pkg="baxter_throw" type="throw_path.py" />
+  <node name="throw" pkg="baxter_throw" type="throw_path.py" output="screen"/>
 
 </launch>
