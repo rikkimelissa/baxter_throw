@@ -59,7 +59,7 @@ class Checker(object):
         plt.plot(self._traj[:,0],self._traj[:,8:],'.')
         plt.show(block=False)
         rospy.loginfo('publishing traj')
-        # self._pub_traj.publish(a)    
+        self._pub_traj.publish(a)    
 
     def publish_path(self):
         a = Float32MultiArray()
@@ -127,11 +127,11 @@ class Checker(object):
             if self._iter == 1:
                 print "chose the first"
                 self._ind1 = 0
-                self._ind2 = round(random()*(path_length-50)) + 49
+                self._ind2 = round(random()*(path_length-20)) + 19
                 print self._ind1, self._ind2
             elif self._iter == 2:
                 print "chose the last"
-                self._ind1 = round(random()*(path_length-50))
+                self._ind1 = round(random()*(path_length-20))
                 self._ind2 = path_length - 1
                 print self._ind1, self._ind2
             else:
