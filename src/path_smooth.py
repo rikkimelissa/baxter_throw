@@ -23,8 +23,8 @@ def main():
     for i in range(iter):
         print i
         path_length = traj.shape[0]
-        if (path_length == 0):
-            break
+        # if (path_length == 0):
+        #     break
         ind1 = round(random()*(path_length-1))
         ind2 = round(random()*(path_length-1))
         if (ind1 > ind2):
@@ -73,7 +73,11 @@ def shortcut(vertex1, vertex2):
             v_max = 4.0
         time, pos, vel = traj_min_acc(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,T)
         s[:,i+1] = pos
-        s[:,i+7] = vel
+        s[:,i+8] = vel
+        # plt.figure()
+        # plt.plot(time,pos)
+        # plt.plot(time,vel)
+        # plt.show(block=False)
     s[:,0] = time + vertex1[0]
     return s
     # for i in range(7):
