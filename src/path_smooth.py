@@ -176,7 +176,7 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
     ap1,ap2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v1-v2)**2)
     if ap1 > 0:
         ts = 1/2.*(T+(v1-v2)/ap1)
-        print ('P-P+'),v1-ap1*ts
+        # print ('P-P+'),v1-ap1*ts
         if ts > 0 and ts < T and v1-ap1*ts > (-v_max - .05):
             a2 = ap1
             tpp1 = tSpace[tSpace <= ts]
@@ -192,7 +192,7 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
             vt2 = np.hstack((vp1,vp2))   
     if ap2 > 0:
         ts = 1/2.*(T+(v1-v2)/ap2)
-        print ('P-P+'), v1-ap2*ts
+        # print ('P-P+'), v1-ap2*ts
         if ts > 0 and ts < T and v1-ap2*ts > (-v_max - .05):
             a2 = ap2
             tpp1 = tSpace[tSpace <= ts]
@@ -252,7 +252,11 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         tt4 = np.hstack((tpp1,tpp2,tpp3))
         vt4 = np.hstack((vp1,vp2,vp3))
 
-    print a1, a2, a3, a4
+    # print a1, a2, a3, a4
+
+    time = np.linspace(0,20,30)
+    pos = np.linspace(0,T,30)
+    vel = np.linspace(0,T,30)
 
     if (a1 < a):
         time = tt1

@@ -119,12 +119,13 @@ class Trajectory(object):
         self._pArm = pMat[:,1:8]
         self._vArm = pMat[:,8:]
 
-        plt.figure()
-        plt.hold(True)
-        plt.plot(self._time, self._pArm)
-        plt.plot(self._time, self._vArm)
-        plt.show(block=False)
-        
+        # plt.close('all')
+        # plt.figure()
+        # plt.plot(self._time, self._pArm)
+        # plt.figure()
+        # plt.plot(self._time, self._vArm)
+        # plt.show(block=False)
+
         self.execute_traj()    
 
     def execute_path(self):

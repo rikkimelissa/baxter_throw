@@ -27,6 +27,7 @@ class Checker(object):
             if (a.data):
                 rospy.loginfo('RRT path checked')
                 self._iter = 1;
+                self._traj, path_orig = path2traj(self._path)
                 self.smooth_path()
             else:
                 rospy.loginfo('Calculating new path')
@@ -35,7 +36,7 @@ class Checker(object):
             if (a.data):
                 self.replace_segment()
             else:
-                if self._iter < 10:
+                if self._iter < 30:
                     self._iter += 1
                     self.smooth_path()
                 else:
@@ -47,7 +48,8 @@ class Checker(object):
         data = np.reshape(self._traj,(N*15,1))
         a.data = np.array(data, dtype = np.float32)
         plt.figure()
-        plt.plot(self_.traj[:,0],self._traj[:,1:8])
+        plt.plot(self._traj[:,0],self._traj[:,1:8])
+        plt.figure()
         plt.plot(self._traj[:,0],self._traj[:,8:])
         plt.show(block=False)
         rospy.loginfo('publishing traj')
@@ -90,17 +92,23 @@ class Checker(object):
         old_dur = self._vertex2[0] - self._vertex1[0]
         new_dur = self._s[-1,0] - self._s[0,0]
         if new_dur < old_dur:
+            print "replacing segment"
             self._traj = np.delete(self._traj,range(int(self._ind1),int(self._ind2+1)),0)
             self._traj[self._ind1:,0] += new_dur - old_dur
             self._traj = np.insert(self._traj,self._ind1,self._s,0)
-        if self._iter < 10:
+            # plt.figure()
+            # plt.plot(self._traj[:,0],self._traj[:,1:8])
+            # plt.plot(self._traj[:,0],self._traj[:,8:])
+            # plt.show(block=False)
+        if self._iter < 30:
+            print "smoothing next segment"
             self._iter += 1
             self.smooth_path()
         else:
+            print "sent to publish"
             self.publish_traj()
 
     def smooth_path(self):
-        self._traj, path_orig = path2traj(self._path)
         path_length = self._traj.shape[0]
         if (path_length == 0):
             self.publish_traj()
@@ -117,7 +125,12 @@ class Checker(object):
                 self._s = shortcut(self._vertex1,self._vertex2)
                 midpoint_s = self._s[self._s.shape[0]/2,:]
                 self._segment = midpoint_s
-                self.publish_segment()      
+                self.publish_segment()  
+            else:
+                if self._iter < 30:
+                    self.smooth_path()
+                else:
+                    self.publish_traj()    
 
 def main():
 
