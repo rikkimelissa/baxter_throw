@@ -144,10 +144,18 @@ class Checker(object):
             if (self._ind1 != self._ind2):
                 self._vertex1 = self._traj[self._ind1,:]
                 self._vertex2 = self._traj[self._ind2,:]
-                self._s = shortcut(self._vertex1,self._vertex2)
-                midpoint_s = self._s[self._s.shape[0]/2,:]
-                self._segment = midpoint_s
-                self.publish_segment()  
+                if np.isfinite(self._vertex1).all() and np.isfinite(self._vertex2).all() and (self._vertex1 < 10).all() and (self._vertex2 < 10).all():
+                    self._s = shortcut(self._vertex1,self._vertex2)
+                    midpoint_s = self._s[self._s.shape[0]/2,:]
+                    self._segment = midpoint_s
+                    self.publish_segment()  
+                else:
+                    if self._iter < 30:
+                        self.smooth_path()
+                    else:
+                        print "sent to publish"
+                        self.publish_traj()
+                        self._executing = False                      
             else:
                 if self._iter < 30:
                     self.smooth_path()

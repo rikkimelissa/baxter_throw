@@ -139,6 +139,7 @@ class Trajectory(object):
 
         for i in range(N):
             self.add_point_pv(self._pArm[i,:].tolist(), self._vArm[i,:].tolist(),t_all[i])
+            # self.add_point_p(self._pArm[i,:].tolist(),t_all[i])
         # traj.add_point_p(thList[i,:].tolist(), t_all[i])
         self.start()
         self.wait(10)
@@ -154,6 +155,7 @@ class Trajectory(object):
 
         for i in range(N):
             self.add_point_pv(self._pArm[i,:].tolist(), self._vArm[i,:].tolist(),self._time[i]+self._t_delay+1)
+            # self.add_point_p(self._pArm[i,:].tolist(), self._time[i]+self._t_delay+1)
         # traj.add_point_p(thList[i,:].tolist(), t_all[i])
 
         # self.add_point_p(self._pArm[-1,:],self._t_delay + 5)
