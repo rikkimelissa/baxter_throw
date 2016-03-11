@@ -89,12 +89,14 @@ def find_path(plot):
     curEdge = edgesB[indB-1]
     ind = 1
     atOrigin = False
+    print treeB, pathB
     while atOrigin == False:
         pathB[ind] = treeB[curEdge[0]]
         curEdge = edgesB[curEdge[0] - 1]
-        ind += 1
         if curEdge[0] == 0:
             atOrigin = True
+        else:
+            ind += 1
     pathB[ind] = treeB[curEdge[0]]
     pathB = pathB[0:ind+1,:]
 
