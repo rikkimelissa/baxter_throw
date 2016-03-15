@@ -61,6 +61,8 @@ class Trajectory(object):
         self._limb_interface = baxter_interface.limb.Limb('right')
         self._q_start = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
        -1.16889336, -0.90888362])
+        # self._q_start = np.array([-0.94950956,  0.85330416,  1.50162505,  1.65105923,  2.8575804 ,
+        # 0.01964355,  0.14972377])
         self.clear(limb)
 
     def add_point_p(self, positions, time):
@@ -165,7 +167,14 @@ class Trajectory(object):
  2.121495429645527,
  -0.20363594959178868,
  -1.2256506495204456,
- -0.4034369472138638])
+ -.87])
+     #        q_set = np.array([0.2331650797585829,
+     # -0.6308495990178764,
+     # 0.5399612373356656,
+     # 2.121495429645527,
+     # -0.20363594959178868,
+     # -1.2256506495204456,
+     # 2.27])
         self.add_point_p(end_point.tolist(),self._t_delay + 5)
         self.start()
         self.wait(10)

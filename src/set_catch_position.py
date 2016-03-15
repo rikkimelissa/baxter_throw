@@ -11,36 +11,56 @@ from quat import quat_to_so3
 import numpy as np
 from std_msgs.msg import Int16
 from functions import JointTrajectory
+from functions import RpToTrans
 
 def main():
 
-    q_set = np.array([-.3048, -.2703, -.1848, 1.908, .758, -1.234, -3.04]) 
-    # q_set = np.array([ 0.47668453, -0.77274282,  0.93150983,  2.08352941,  0.54149522,
-    #    -1.26745163, -2.06742261])
-    # q_set = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
-    #    -1.16889336, -0.90888362])
- #    q_set = np.array([0.2331650797585829,   
- # -0.6308495990178764,
- # 0.5399612373356656,
- # 2.121495429645527,
- # -0.20363594959178868,
- # -1.2256506495204456,
- # -0.4034369472138638])
-
-
 
     rospy.init_node('set_catch_position')
+    pos = rospy.get_param('~pos',1)
+
+    if (pos == 1):
+        catch = np.array([.65, .25, 0]) # my .7?
+    elif (pos == 2):
+        catch = np.array([.68, .1, 0])
+    elif (pos == 3):
+        catch = np.array([.72, .1, 0])
+    else:
+        pass
+
+    th_init = np.array([-.3048, -.2703, -.1848, 1.908, .758, -1.234, -3.04]) 
+    R = np.array([[ 0.26397895, -0.34002068,  0.90260791],
+        [-0.01747676, -0.93733484, -0.34799134],
+        [ 0.96437009,  0.07608772, -0.25337913]])
+
+    X = RpToTrans(R,catch)
+
+    # Find end joint angles with IK
+    robot = URDF.from_parameter_server()
+    base_link = robot.get_root()
+    kdl_kin = KDLKinematics(robot, base_link, 'left_gripper_base')
+    seed = 0
+    q_ik = kdl_kin.inverse(X, th_init)
+    while q_ik == None:
+        seed += 0.01
+        q_ik = kdl_kin.inverse(X, th_init+seed)
+        if (seed>1):
+            # return False
+            break
+    q_goal = q_ik
+    print q_goal
+
     # limb_interface = baxter_interface.limb.Limb('right')
     limb_interface = baxter_interface.limb.Limb('left')
 
     angles = limb_interface.joint_angles()
 
     for ind, joint in enumerate(limb_interface.joint_names()):
-        angles[joint] = q_set[ind]    
+        angles[joint] = q_goal[ind]    
 
     limb_interface.move_to_joint_positions(angles)
     # rospy.sleep(5)
-
+    print 'done'
 
     # rospy.spin()   
         
@@ -50,11 +70,3 @@ if __name__ == "__main__":
     except rospy.ROSInterruptException:
         pass
 
-
-# {'left_e0': -0.18484468494019235,
-#  'left_e1': 1.9086555953264261,
-#  'left_s0': -0.304878681592226,
-#  'left_s1': -0.2703641138648042,
-#  'left_w0': 0.7581700044123657,
-#  'left_w1': -1.2340875438538152,
-#  'left_w2': -3.0472528351343744}

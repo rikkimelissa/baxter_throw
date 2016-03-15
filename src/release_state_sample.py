@@ -6,21 +6,16 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # Define range and static variables
-x_range = [.6,.8] # near x position of catcher
-y_range = [-.62,0] # between start position and catch position
-z_range = [.1,.4] # between catch position and high position of hand
-vel_range_x = [0,.1] # need to experiment with these ranges
-vel_range_y = [.6, 1.5] # needs minimum velocity for liftoff but can't be so high that JTAS will fail
-vel_range_z = [0, .5]
+# x_range = [.6,.8] # near x position of catcher
+# y_range = [-.62,0] # between start position and catch position
+# z_range = [.1,.4] # between catch position and high position of hand
+# vel_range_x = [0,.1] # need to experiment with these ranges
+# vel_range_y = [.3, 1.5] # needs minimum velocity for liftoff but can't be so high that JTAS will fail
+# vel_range_z = [0, 1.5]
 cup_height = .12
 block_height = .018
 block_width = .047
 g = 9.8 # m/s^2
-
-# These are set by user
-catch_x = .68
-catch_z = -.6 # range from - .5 to 0 # lower range determined by baxter
-catch_y = .7 # range from .29 to .5, works after .5 but hard to find solutions
 
 def plot_results():
     throw_y_list = [None]*100
@@ -50,6 +45,17 @@ def plot_results():
     plt.show(block=False)
 
 def test_pos(catch_x, catch_y, catch_z):
+    if catch_y == .3:
+        print 3
+        x_range = [.6,.8] # near x position of catcher
+        y_range = [-.1,0] # between start position and catch position
+        z_range = [.2,.3] # between catch position and high position of hand
+    elif catch_y == .7:
+        print 1
+        x_range = [.6,.8] # near x position of catcher
+        y_range = [-.15,0] # between start position and catch position
+        z_range = [.3,.4] # between catch position and high position of hand
+        
     throw_x = random()*(x_range[1] - x_range[0]) + x_range[0]
     throw_y = random()*(y_range[1] - y_range[0]) + y_range[0]
     throw_z = random()*(z_range[1] - z_range[0]) + z_range[0]
@@ -57,15 +63,26 @@ def test_pos(catch_x, catch_y, catch_z):
     dy = catch_y - throw_y - block_width
     dz = catch_z + cup_height - throw_z - block_height
     rand = random()
-    if find_velocity_param(dx, dy, dz, rand):
-        vel, alpha = find_velocity_param(dx, dy, dz, rand)
+    if find_velocity_param(dx, dy, dz, rand, catch_y):
+        vel, alpha = find_velocity_param(dx, dy, dz, rand, catch_y)
         return [throw_y, throw_z, vel, alpha]
 
-def find_velocity_param(dx,dy,dz, rand):
+def find_velocity_param(dx,dy,dz, rand, catch_y):
+    if catch_y == .3:
+        print 3
+        vel_range_x = [0,.1] # need to experiment with these ranges
+        vel_range_y = [.6, 1] # needs minimum velocity for liftoff but can't be so high that JTAS will fail
+        vel_range_z = [0, .5]
+        alpha_max = 10*pi/180
+    elif catch_y == .7:
+        print 1
+        vel_range_x = [0,.1] # need to experiment with these ranges
+        vel_range_y = [.3, 1.5] # needs minimum velocity for liftoff but can't be so high that JTAS will fail
+        vel_range_z = [0, 1.5]
+        alpha_max = 25*pi/180
     alpha_min = atan2(dz,dy)
-    if alpha_min <= (-pi/8 + .01):
-        alpha_min = -pi/8 + .01
-    alpha_max = 25*pi/180
+    if alpha_min <= (-pi/2 + .01):
+        alpha_min = -pi/2 + .01
     inc = 0
     alpha_list = []
     v_list = []

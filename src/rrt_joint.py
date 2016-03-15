@@ -10,9 +10,9 @@ from pykdl_utils.kdl_kinematics import KDLKinematics
 from functions import RpToTrans
 
 
-catch_x = .68
-catch_z = -.6 # -.6 # range from - .5 to 0 # lower range determined by baxter
+catch_x = .8
 catch_y = .7 # .7
+catch_z = -.6 # -.6 # range from - .5 to 0 # lower range determined by baxter
 
 def find_path(plot):
 
@@ -21,23 +21,27 @@ def find_path(plot):
     q_start = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
        -1.16889336, -0.90888362])
     # flipped orientation
-    q_start = np.array([-0.94950956,  0.85330416,  1.50162505,  1.65105923,  2.8575804 ,
-        0.01964355,  0.14972377])
+    # q_start = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
+    #    -1.16889336, 2.23])
 
     # Find goal for throwing
     pos_goal = find_feasible_release(catch_x, catch_y, catch_z)
+    print('found release state')
     print pos_goal
 
     # Add rotation to position and convert to rotation matrix    
-    # R = np.array([[-0.11121663, -0.14382586,  0.98333361],
-    #    [-0.95290138,  0.2963578 , -0.06442835],
-    #    [-0.28215212, -0.94418546, -0.17001177]])
-    # R = np.array([[ 0.06713617, -0.05831221,  0.99603836],
-    #     [-0.97267055, -0.22621871,  0.05231732],
-    #     [ 0.22227178, -0.97232956, -0.07190603]])
     R = np.array([[0.11121663, -0.14382586,  0.98333361],
        [-0.95290138,  -0.2963578 , 0.06442835],
        [0.28215212, -0.94418546, -0.17001177]])
+
+    # # flipped ending orientation
+    # # R = np.array([[-0.05154769, -0.02369375,  0.99838942],
+    # #     [ 0.9421129 ,  0.33050364,  0.05648559],
+    # #     [-0.33130969,  0.94350726,  0.00528549]])
+
+    # R = np.array([[ 0.04276406,  0.0272318 ,  0.99871401],
+    #     [-0.94477517, -0.32399151,  0.04928868],
+    #     [ 0.32491708, -0.94566798,  0.01187273]])
 
     p = np.hstack((0.68,pos_goal[0:2]));
     X = RpToTrans(R,p)
@@ -129,7 +133,7 @@ def find_path(plot):
 def build_tree(iter,treeA, treeB ,edgesA, edgesB, plot, kdl_kin):
     i = 0
     while i < iter:
-
+        # print(i)
         # jointsA = np.random.rand(1,7)[0]*[3.4033, 3.194, 6.1083, 2.67, 6.117, 3.6647, 6.117] - [1.7016, 2.147, 3.05, .05, 3.059, 1.57, 3.059]
         jointsA = np.random.rand(1,7)[0]*[2.5, 2.5, 4, 1.5, 4, 2.5, 4] - [1.25, 1.25, 2.0, .75, 2.0, .75, 2.0]
         velA = np.random.rand(1,7)[0]*[3.0,3.0,3.0,3.0,6.0,3.0,6.0] - [1.5,1.5,1.5,1.5,2,1.5,2]

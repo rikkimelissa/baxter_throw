@@ -12,14 +12,14 @@ from math import sqrt
 def main():
     met = False
     plt.close('all')
-    f, axarr = plt.subplots(2, 2,facecolor='w')
+    # f, axarr = plt.subplots(2, 2,facecolor='w')
     while (met == False):
         path = find_path(False);
         traj, path_orig = path2traj(path);
         # plt.close('all')
         # plt.figure()
-        axarr[0,0].plot(traj[:,0],traj[:,1:8])
-        axarr[0,0].set_title('Iterations = 0')
+        # axarr[0,0].plot(traj[:,0],traj[:,1:8])
+        # axarr[0,0].set_title('Iterations = 0')
         # plt.show(block=False)
         # plt.figure()
         # plt.plot(traj[:,0],traj[:,9:])
@@ -63,29 +63,29 @@ def main():
                         traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
                         traj[ind1:,0] += new_dur - old_dur
                         traj = np.insert(traj,ind1,s,0)
-                        if plot == 0:
-                            axarr[0,1].plot(traj[:,0],traj[:,1:8])
-                            title = "Iterations = " + str(i+1)
-                            axarr[0,1].set_title(title)
-                            plot = 1
-                        elif plot == 1 and i > 3:
-                            axarr[1,0].plot(traj[:,0],traj[:,1:8])
-                            title = "Iterations = " + str(i+1)
-                            axarr[1,0].set_title(title)
-                            plot = 2
-                        elif plot == 2 and i > 10:
-                            axarr[1,1].plot(traj[:,0],traj[:,1:8])
-                            title = "Iterations = " + str(i+1)
-                            axarr[1,1].set_title(title)
-                            plot = 3
+                        # if plot == 0:
+                        #     axarr[0,1].plot(traj[:,0],traj[:,1:8])
+                        #     title = "Iterations = " + str(i+1)
+                        #     axarr[0,1].set_title(title)
+                        #     plot = 1
+                        # elif plot == 1 and i > 3:
+                        #     axarr[1,0].plot(traj[:,0],traj[:,1:8])
+                        #     title = "Iterations = " + str(i+1)
+                        #     axarr[1,0].set_title(title)
+                        #     plot = 2
+                        # elif plot == 2 and i > 10:
+                        #     axarr[1,1].plot(traj[:,0],traj[:,1:8])
+                        #     title = "Iterations = " + str(i+1)
+                        #     axarr[1,1].set_title(title)
+                        #     plot = 3
         if (traj[:,6] > -1.6).all():
             # print traj[:,6]
             met = True
         else:
             print "trying again"
 
-    # plt.figure()
-    # plt.plot(traj[:,0],traj[:,1:8])
+    plt.figure()
+    plt.plot(traj[:,0],traj[:,1:8])
     # plt.show(block=False)
     # plt.figure()
     # plt.plot(traj[:,0],traj[:,8:15],'.')
@@ -362,16 +362,16 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         acc = at4
         a = a4
 
-    if (a == 20):
-        print "timed out"
-        print x1,x2,v1,v2,T
-        print x1-x2, v1-v2
-
-    if a==20 and abs(x1-x2) < .1 and abs(v1-v2) < .1:
+    if a==20 and abs(x1-x2) < .15 and abs(v1-v2) < .15:
         time = tSpace
         pos = np.mean((x1,x2))*np.ones((tSpace.shape[0]))
         vel = np.mean((v1,v2))*np.ones((tSpace.shape[0]))
         acc = 0*np.ones((tSpace.shape[0]))
+
+    if (a == 20):
+        print "timed out"
+        print x1,x2,v1,v2,T
+        print x1-x2, v1-v2
 
     return time, pos, vel, acc 
     # returns time, pos, vel paths

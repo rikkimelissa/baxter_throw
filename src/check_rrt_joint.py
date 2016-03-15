@@ -15,9 +15,9 @@ from random import random
 class Checker(object):
     def __init__(self):
         self._coll_checked = False
-        self._pub_joints = rospy.Publisher('joint_state_check', numpy_msg(Float32MultiArray), queue_size = 10)
+        self._pub_joints = rospy.Publisher('joint_state_check', numpy_msg(Float32MultiArray), queue_size = 10, latch=True)
         self._sub = rospy.Subscriber('collision_check', Int16, self.sub_cb)
-        self._pub_path = rospy.Publisher('joint_path',numpy_msg(Float32MultiArray), queue_size = 10)
+        # self._pub_path = rospy.Publisher('joint_path',numpy_msg(Float32MultiArray), queue_size = 10)
         self._pub_traj = rospy.Publisher('joint_traj',numpy_msg(Float32MultiArray), queue_size = 10)
         self._iter = 0
         self._executing = True
@@ -50,19 +50,20 @@ class Checker(object):
 
     def publish_traj(self):
 
-        if (self._traj[:,6] > -1.7).all():
+        if (self._traj[:,6] > -1.9).all():
             a = Float32MultiArray()
             N = self._traj.shape[0]
             data = np.reshape(self._traj,(N*22,1))
             a.data = np.array(data, dtype = np.float32)
-            plt.figure()
-            plt.plot(self._traj[:,0],self._traj[:,1:8],'.')
-            plt.figure()
-            plt.plot(self._traj[:,0],self._traj[:,8:15],'.')
+            # plt.figure()
+            # plt.plot(self._traj[:,0],self._traj[:,1:8],'.')
+            # plt.figure()
+            # plt.plot(self._traj[:,0],self._traj[:,8:15],'.')
             # plt.figure()
             # plt.plot(self._traj[:,0],self._traj[:,15:],'.')
-            plt.show(block=False)
+            # plt.show(block=False)
             # rospy.loginfo('publishing traj')
+            rospy.loginfo(rospy.get_time() - self._start)
             self._pub_traj.publish(a)   
         else:
             rospy.loginfo("trying again")
@@ -71,13 +72,13 @@ class Checker(object):
             self.publish_joints()
  
 
-    def publish_path(self):
-        a = Float32MultiArray()
-        N = self._path.shape[0]
-        data = np.reshape(self._path,(N*14,1))
-        a.data = np.array(data, dtype = np.float32)
-        # rospy.loginfo('publishing path')
-        self._pub_path.publish(a)
+    # def publish_path(self):
+    #     a = Float32MultiArray()
+    #     N = self._path.shape[0]
+    #     data = np.reshape(self._path,(N*14,1))
+    #     a.data = np.array(data, dtype = np.float32)
+    #     # rospy.loginfo('publishing path')
+    #     self._pub_path.publish(a)
 
     def find_new_path(self):
         self._path = find_path(False)
@@ -94,7 +95,7 @@ class Checker(object):
         # rospy.loginfo('checking collision')
         # rospy.loginfo(a)
         self._pub_joints.publish(a)   
-        # print ('published')
+        rospy.loginfo ('published RRT')
 
     def publish_segment(self):
         a = Float32MultiArray()
@@ -183,7 +184,9 @@ def main():
     rospy.init_node('jsc_publisher')
     rate = rospy.Rate(60)    
     check = Checker()
+    check._start = rospy.get_time()
     check._path = find_path(False)
+    rospy.loginfo('path found')
     check.publish_joints()
 
     while(check._executing):
