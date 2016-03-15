@@ -97,6 +97,7 @@ Trying to calculate a throw position
 
 
 
+q_throw = np.array([.73, -1.11, .75, 2.22, .624, -1.2, -2.38])
 
 
 

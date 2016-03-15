@@ -114,10 +114,11 @@ class Trajectory(object):
     def traj_cb(self,a):
         rospy.loginfo('Received trajectory')
         pList = a.data;
-        pMat = np.reshape(pList,(pList.shape[0]/15,15))
+        pMat = np.reshape(pList,(pList.shape[0]/22,22))
         self._time = pMat[:,0]
         self._pArm = pMat[:,1:8]
-        self._vArm = pMat[:,8:]
+        self._vArm = pMat[:,8:15]
+        self._aArm = pMat[:,15:]
 
         # plt.close('all')
         # plt.figure()
@@ -154,11 +155,18 @@ class Trajectory(object):
         self.add_point_p(self._q_start,self._t_delay)
 
         for i in range(N):
-            self.add_point_pv(self._pArm[i,:].tolist(), self._vArm[i,:].tolist(),self._time[i]+self._t_delay+1)
+            self.add_point(self._pArm[i,:].tolist(), self._vArm[i,:].tolist(), self._aArm[i,:].tolist(), self._time[i]+self._t_delay+1)
             # self.add_point_p(self._pArm[i,:].tolist(), self._time[i]+self._t_delay+1)
         # traj.add_point_p(thList[i,:].tolist(), t_all[i])
 
-        # self.add_point_p(self._pArm[-1,:],self._t_delay + 5)
+        end_point = np.array([0.2331650797585829,
+ -0.6308495990178764,
+ 0.5399612373356656,
+ 2.121495429645527,
+ -0.20363594959178868,
+ -1.2256506495204456,
+ -0.4034369472138638])
+        self.add_point_p(end_point.tolist(),self._t_delay + 5)
         self.start()
         self.wait(10)
         self.clear('right')

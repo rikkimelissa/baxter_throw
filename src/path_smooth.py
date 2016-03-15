@@ -10,70 +10,102 @@ from random import random
 from math import sqrt
 
 def main():
-    path = find_path(False);
-    traj, path_orig = path2traj(path);
-    plt.close('all')
-    # plt.figure()
-    # plt.plot(traj[:,0],traj[:,1:8],'.')
-    # plt.show(block=False)
-    # plt.figure()
-    # plt.plot(traj[:,0],traj[:,9:])
-    # plt.show(block=False)
-    iter = 30
-    for i in range(iter):
-        # print i
-        path_length = traj.shape[0]
-        print i, path_length
-        # if (path_length == 0):
-        #     break
-        if i == 0:
-            print "chose the first"
-            ind1 = 0
-            ind2 = round(random()*(path_length-20)) + 19
-            print ind1, ind2
-        elif i == 1:
-            print "chose the last"
-            ind1 = round(random()*(path_length-20))
-            ind2 = path_length - 1
-            print ind1, ind2
+    met = False
+    f, axarr = plt.subplots(2, 2,facecolor='w')
+    while (met == False):
+        path = find_path(False);
+        traj, path_orig = path2traj(path);
+        # plt.close('all')
+        # plt.figure()
+        axarr[0,0].plot(traj[:,0],traj[:,1:8])
+        axarr[0,0].set_title('Iterations = 0')
+        # plt.show(block=False)
+        # plt.figure()
+        # plt.plot(traj[:,0],traj[:,9:])
+        # plt.show(block=False)
+        iter = 30
+        plot = 0
+        for i in range(iter):
+            print i
+            path_length = traj.shape[0]
+            # print i, path_length
+            # if (path_length == 0):
+            #     break
+            if i == 0:
+                print "chose the first"
+                ind1 = 0
+                ind2 = round(random()*(path_length-20)) + 19
+                print ind1, ind2
+            elif i == 1:
+                print "chose the last"
+                ind1 = round(random()*(path_length-20))
+                ind2 = path_length - 1
+                print ind1, ind2
+            else:
+                ind1 = round(random()*(path_length-1))
+                ind2 = round(random()*(path_length-1))
+            if (ind1 > ind2):
+                temp = ind1;
+                ind1 = ind2;
+                ind2 = temp
+            if (ind1 != ind2):
+                vertex1 = traj[ind1,:]
+                vertex2 = traj[ind2,:]
+                if np.isfinite(vertex1).all() and np.isfinite(vertex2).all() and (vertex1 < 10).all() and (vertex2 < 10).all():
+                    s = shortcut(vertex1,vertex2)
+                    # if (collision_free(s)):
+                    # replace segment in path
+                    old_dur = vertex2[0] - vertex1[0]
+                    new_dur = s[-1,0] - s[0,0]
+                    if new_dur < old_dur:
+                        # print new_dur, old_dur, ind1, ind2
+                        traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
+                        traj[ind1:,0] += new_dur - old_dur
+                        traj = np.insert(traj,ind1,s,0)
+                        if plot == 0:
+                            axarr[0,1].plot(traj[:,0],traj[:,1:8])
+                            title = "Iterations = " + str(i+1)
+                            axarr[0,1].set_title(title)
+                            plot = 1
+                        elif plot == 1:
+                            axarr[1,0].plot(traj[:,0],traj[:,1:8])
+                            title = "Iterations = " + str(i+1)
+                            axarr[1,0].set_title(title)
+                            plot = 2
+                        elif plot == 2:
+                            axarr[1,1].plot(traj[:,0],traj[:,1:8])
+                            title = "Iterations = " + str(i+1)
+                            axarr[1,1].set_title(title)
+                            plot = 3
+        if (traj[:,6] > -1.6).all():
+            # print traj[:,6]
+            met = True
         else:
-            ind1 = round(random()*(path_length-1))
-            ind2 = round(random()*(path_length-1))
-        if (ind1 > ind2):
-            temp = ind1;
-            ind1 = ind2;
-            ind2 = temp
-        if (ind1 != ind2):
-            vertex1 = traj[ind1,:]
-            vertex2 = traj[ind2,:]
-            if np.isfinite(vertex1).all() and np.isfinite(vertex2).all() and (vertex1 < 10).all() and (vertex2 < 10).all():
-                s = shortcut(vertex1,vertex2)
-                # if (collision_free(s)):
-                # replace segment in path
-                old_dur = vertex2[0] - vertex1[0]
-                new_dur = s[-1,0] - s[0,0]
-                if new_dur < old_dur:
-                    # print new_dur, old_dur, ind1, ind2
-                    traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
-                    traj[ind1:,0] += new_dur - old_dur
-                    traj = np.insert(traj,ind1,s,0)
-    # plt.figure()
-    # plt.plot(traj[:,0],traj[:,1:8])
-    # plt.show(block=False)
-    # plt.figure()
-    # plt.plot(traj[:,0],traj[:,8:],'.')
-    # plt.show(block=False)
+            print "trying again"
 
+    plt.figure()
+    plt.plot(traj[:,0],traj[:,1:8])
+    plt.show(block=False)
+    plt.figure()
+    plt.plot(traj[:,0],traj[:,8:15],'.')
+    plt.show(block=False)
+    plt.figure()
+    plt.plot(traj[:,0],traj[:,15:],'.')
+    plt.show(block=False)
 
 
 def shortcut(vertex1, vertex2):
     a_max = 3.0
     v_max = 1.5
     T = 0
-    s = np.zeros((60,15)) 
+    s = np.zeros((60,22)) 
     for i in range(7):
         if i > 3:
             v_max = 3.0
+            a_max = 3.0
+        # if i == 5:
+        #     v_max = 1.0
+        #     a_max = 1.0
         t = execution_time(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,a_max)
         if t > T:
             T = t
@@ -81,7 +113,12 @@ def shortcut(vertex1, vertex2):
     for i in range(7):
         if i > 3:
             v_max = 3.0
-        time, pos, vel = traj_min_acc(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,T)
+            a_max = 3.0
+        # if i == 5:
+        #     v_max = 1.0
+        #     a_max = 1.0
+        # print i, vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,T
+        time, pos, vel, acc = traj_min_acc(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,T)
         # print vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8]
         # plt.close('all')
         # plt.plot(time,pos)
@@ -90,6 +127,7 @@ def shortcut(vertex1, vertex2):
 
         s[:,i+1] = pos
         s[:,i+8] = vel
+        s[:,i+15] = acc
     s[:,0] = time + vertex1[0]
     return s
 
@@ -158,75 +196,90 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
 
     #P+P-
     sig = 1
-    ap1,ap2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v1-v2)**2)
-    if ap1 > 0:
-        ts = 1/2.*(T+(v2-v1)/ap1)
-        if ts > 0 and ts < (T + .01) and v1+ap1*ts < (v_max + .05):
-            a1 = ap1
+    atemp1,atemp2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v1-v2)**2)
+    if atemp1 > 0:
+        ts = 1/2.*(T+(v2-v1)/atemp1)
+        if ts > 0 and ts < (T + .01) and v1+atemp1*ts < (v_max + .05):
+            a1 = atemp1
             tpp1 = tSpace[tSpace <= ts]
             tpp2 = tSpace[tSpace > ts]
             xp1 = a1/2*tpp1**2 + v1*tpp1 + x1
             vp1 = a1*tpp1 + v1
+            ap1 = a1*np.ones((tpp1.shape[0]))
             xp = a1/2*ts**2 + v1*ts + x1
             vp = a1*ts + v1
             xp2 = -a1/2*(tpp2 - ts)**2 + vp*(tpp2-ts) + xp 
             vp2 = -a1*(tpp2-ts) + vp
+            ap2 = -a1*np.ones((tpp2.shape[0]))
 
             xt1 = np.hstack((xp1,xp2))
             tt1 = np.hstack((tpp1,tpp2))
             vt1 = np.hstack((vp1,vp2))   
-    if ap2 > 0:
-        ts = 1/2.*(T+(v2-v1)/ap2)
-        if ts > 0 and ts < (T + .01) and v1+ap2*ts < (v_max + .05):
-            a1 = ap2
+            at1 = np.hstack((ap1,ap2))
+
+    if atemp2 > 0:
+        ts = 1/2.*(T+(v2-v1)/atemp2)
+        if ts > 0 and ts < (T + .01) and v1+atemp2*ts < (v_max + .05):
+            a1 = atemp2
             tpp1 = tSpace[tSpace <= ts]
             tpp2 = tSpace[tSpace > ts]
             xp1 = a1/2*tpp1**2 + v1*tpp1 + x1
             vp1 = a1*tpp1 + v1
+            ap1 = a1*np.ones((tpp1.shape[0]))
             xp = a1/2*ts**2 + v1*ts + x1
             vp = a1*ts + v1
             xp2 = -a1/2*(tpp2 - ts)**2 + vp*(tpp2-ts) + xp 
             vp2 = -a1*(tpp2-ts) + vp
+            ap2 = -a1*np.ones((tpp2.shape[0]))
 
             xt1 = np.hstack((xp1,xp2))
             tt1 = np.hstack((tpp1,tpp2))
             vt1 = np.hstack((vp1,vp2))   
+            at1 = np.hstack((ap1,ap2))
 
     #P-P+
     sig = -1
-    ap1,ap2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v1-v2)**2)
-    if ap1 > 0:
-        ts = 1/2.*(T+(v1-v2)/ap1)
-        # print ('P-P+'),v1-ap1*ts
-        if ts > 0 and ts < (T + .01) and v1-ap1*ts > (-v_max - .05):
-            a2 = ap1
+    atemp1,atemp2 = quad_solve(T**2, sig*(2*T*(v1+v2)+4*(x1-x2)),-(v1-v2)**2)
+    if atemp1 > 0:
+        ts = 1/2.*(T+(v1-v2)/atemp1)
+        # print ('P-P+'),v1-atemp1*ts
+        if ts > 0 and ts < (T + .01) and v1-atemp1*ts > (-v_max - .05):
+            a2 = atemp1
             tpp1 = tSpace[tSpace <= ts]
             tpp2 = tSpace[tSpace > ts]
             xp1 = -a2/2*tpp1**2 + v1*tpp1 + x1
             vp1 = -a2*tpp1 + v1
+            ap1 = -a2*np.ones((tpp1.shape[0]))
             xp = -a2/2*ts**2 + v1*ts + x1
             vp = -a2*ts + v1
             xp2 = a2/2*(tpp2 - ts)**2 + vp*(tpp2-ts) + xp 
             vp2 = a2*(tpp2-ts) + vp
+            ap2 = a2*np.ones((tpp2.shape[0]))
+
             xt2 = np.hstack((xp1,xp2))
             tt2 = np.hstack((tpp1,tpp2))
             vt2 = np.hstack((vp1,vp2))   
-    if ap2 > 0:
-        ts = 1/2.*(T+(v1-v2)/ap2)
-        # print ('P-P+'), v1-ap2*ts
-        if ts > 0 and ts < (T + .01) and v1-ap2*ts > (-v_max - .05):
-            a2 = ap2
+            at2 = np.hstack((ap1,ap2))
+    if atemp2 > 0:
+        ts = 1/2.*(T+(v1-v2)/atemp2)
+        # print ('P-P+'), v1-atemp2*ts
+        if ts > 0 and ts < (T + .01) and v1-atemp2*ts > (-v_max - .05):
+            a2 = atemp2
             tpp1 = tSpace[tSpace <= ts]
             tpp2 = tSpace[tSpace > ts]
             xp1 = -a2/2*tpp1**2 + v1*tpp1 + x1
             vp1 = -a2*tpp1 + v1
+            ap1 = -a2*np.ones((tpp1.shape[0]))
             xp = -a2/2*ts**2 + v1*ts + x1
             vp = -a2*ts + v1
             xp2 = a2/2*(tpp2 - ts)**2 + vp*(tpp2-ts) + xp 
             vp2 = a2*(tpp2-ts) + vp
+            ap2 = a2*np.ones((tpp2.shape[0]))
+
             xt2 = np.hstack((xp1,xp2))
             tt2 = np.hstack((tpp1,tpp2))
             vt2 = np.hstack((vp1,vp2)) 
+            at2 = np.hstack((ap1,ap2))
 
     # P+L+P-
     a3temp = (v_max**2 - v_max*(v1+v2) + .5*(v1**2 + v2**2))/(T*v_max - (x2-x1))
@@ -240,15 +293,19 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         tpp3 = tSpace[tSpace > (t1+tL)]
         xp1 = a3/2*tpp1**2 + v1*tpp1 + x1
         vp1 = a3*tpp1 + v1
+        ap1 = a3*np.ones((tpp1.shape[0]))
         xp1e = a3/2*t1**2 + v1*t1 + x1
         xp2 = v_max*(tpp2-t1)+xp1e
         xp2e = v_max*(tL) + xp1e
         vp2 = v_max*np.ones((tpp2.shape[0]))
+        ap2 = 0*np.ones((tpp2.shape[0]))
         xp3 = -a3/2*(tpp3-tL-t1)**2 + v_max*(tpp3-tL-t1) + xp2e
         vp3 = -a3*(tpp3-tL-t1) + v_max
+        ap3 = -a3*np.ones((tpp3.shape[0]))
         xt3 = np.hstack((xp1,xp2,xp3))
         tt3 = np.hstack((tpp1,tpp2,tpp3))
         vt3 = np.hstack((vp1,vp2,vp3))
+        at3 = np.hstack((ap1,ap2,ap3))
 
     #P-L-P+
     a4temp = (v_max**2 + v_max*(v1+v2) + .5*(v1**2 + v2**2))/(T*-v_max - (x2-x1))
@@ -263,15 +320,19 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         tpp3 = tSpace[tSpace > (t1+tL)]
         xp1 = -a4/2*tpp1**2 + v1*tpp1 + x1
         vp1 = -a4*tpp1 + v1
+        ap1 = -a4*np.ones((tpp1.shape[0]))
         xp1e = -a4/2*t1**2 + v1*t1 + x1
         xp2 = -v_max*(tpp2-t1)+xp1e
         xp2e = -v_max*(tL) + xp1e
         vp2 = -v_max*np.ones((tpp2.shape[0]))
+        ap2 = 0*np.ones((tpp2.shape[0]))
         xp3 = a4/2*(tpp3-tL-t1)**2 + -v_max*(tpp3-tL-t1) + xp2e
         vp3 = a4*(tpp3-tL-t1) + -v_max
+        ap3 = a4*np.ones((tpp3.shape[0]))
         xt4 = np.hstack((xp1,xp2,xp3))
         tt4 = np.hstack((tpp1,tpp2,tpp3))
         vt4 = np.hstack((vp1,vp2,vp3))
+        at4 = np.hstack((ap1,ap2,ap3))
 
     # print a1, a2, a3, a4
 
@@ -279,21 +340,25 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         time = tt1
         pos = xt1
         vel = vt1
+        acc = at1
         a = a1
     if (a2 < a):
         time = tt2
         pos = xt2
         vel = vt2
+        acc = at2
         a = a2
     if (a3 < a):
         time = tt3
         pos = xt3
         vel = vt3
+        acc = at3
         a = a3
     if (a4 < a):
         time = tt4
         pos = xt4
         vel = vt4
+        acc = at4
         a = a4
 
     if (a == 20):
@@ -305,11 +370,9 @@ def traj_min_acc(x1,x2,v1,v2,v_max,T):
         time = tSpace
         pos = np.mean((x1,x2))*np.ones((tSpace.shape[0]))
         vel = np.mean((v1,v2))*np.ones((tSpace.shape[0]))
+        acc = 0*np.ones((tSpace.shape[0]))
 
-
-
-
-    return time, pos, vel 
+    return time, pos, vel, acc 
     # returns time, pos, vel paths
 
 def quad_solve(a,b,c):
@@ -324,7 +387,7 @@ def quad_solve(a,b,c):
 # velocity or acceleration limit and a third-order polynomial time scaling
 def path2traj(path):
     N = path.shape[0]
-    traj_comp = np.empty(((N-1)*9,15))
+    traj_comp = np.empty(((N-1)*9,22))
     path_orig = np.empty((N-1,15))
     ind = 0;
     t_delay = 0;
@@ -374,6 +437,7 @@ def path2traj(path):
                     break;
                 traj_comp[9*ind:9*ind+9,i+1] = jP[:-1]   
                 traj_comp[9*ind:9*ind+9,i+8] = jV[:-1]  
+                traj_comp[9*ind:9*ind+9,i+15] = jP[:-1]
                 # print ('Met')
 
         traj_comp[9*ind:9*ind+9,0] = tSpace[:-1] + t_delay

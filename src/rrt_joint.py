@@ -11,8 +11,8 @@ from functions import RpToTrans
 
 
 catch_x = .68
-catch_z = -.6 # range from - .5 to 0 # lower range determined by baxter
-catch_y = .7 
+catch_z = -.6 # -.6 # range from - .5 to 0 # lower range determined by baxter
+catch_y = .7 # .7
 
 def find_path(plot):
 
@@ -20,14 +20,25 @@ def find_path(plot):
     pos_init = [-.62, -.1, 0, 0]
     q_start = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
        -1.16889336, -0.90888362])
+    # flipped orientation
+    q_start = np.array([-0.94950956,  0.85330416,  1.50162505,  1.65105923,  2.8575804 ,
+        0.01964355,  0.14972377])
 
     # Find goal for throwing
     pos_goal = find_feasible_release(catch_x, catch_y, catch_z)
+    print pos_goal
 
     # Add rotation to position and convert to rotation matrix    
-    R = np.array([[-0.11121663, -0.14382586,  0.98333361],
-       [-0.95290138,  0.2963578 , -0.06442835],
-       [-0.28215212, -0.94418546, -0.17001177]])
+    # R = np.array([[-0.11121663, -0.14382586,  0.98333361],
+    #    [-0.95290138,  0.2963578 , -0.06442835],
+    #    [-0.28215212, -0.94418546, -0.17001177]])
+    # R = np.array([[ 0.06713617, -0.05831221,  0.99603836],
+    #     [-0.97267055, -0.22621871,  0.05231732],
+    #     [ 0.22227178, -0.97232956, -0.07190603]])
+    R = np.array([[0.11121663, -0.14382586,  0.98333361],
+       [-0.95290138,  -0.2963578 , 0.06442835],
+       [0.28215212, -0.94418546, -0.17001177]])
+
     p = np.hstack((0.68,pos_goal[0:2]));
     X = RpToTrans(R,p)
 
@@ -45,6 +56,7 @@ def find_path(plot):
             # return False
             break
     q_goal = q_ik
+    # print q_goal
 
     # Transform to joint velocities using Jacobian
     jacobian = kdl_kin.jacobian(q_ik)
@@ -89,7 +101,7 @@ def find_path(plot):
     curEdge = edgesB[indB-1]
     ind = 1
     atOrigin = False
-    print treeB, pathB
+    # print treeB, pathB
     while atOrigin == False:
         pathB[ind] = treeB[curEdge[0]]
         curEdge = edgesB[curEdge[0] - 1]
@@ -119,14 +131,14 @@ def build_tree(iter,treeA, treeB ,edgesA, edgesB, plot, kdl_kin):
     while i < iter:
 
         # jointsA = np.random.rand(1,7)[0]*[3.4033, 3.194, 6.1083, 2.67, 6.117, 3.6647, 6.117] - [1.7016, 2.147, 3.05, .05, 3.059, 1.57, 3.059]
-        jointsA = np.random.rand(1,7)[0]*[2.5, 2.5, 4, 1.5, 4, 2.5, 4] - [1.25, 1.25, 2.0, .75, 2.0, 1.25, 2.0]
-        velA = np.random.rand(1,7)[0]*[3.0,3.0,3.0,3.0,6.0,6.0,6.0] - [1.5,1.5,1.5,1.5,2,2,2]
+        jointsA = np.random.rand(1,7)[0]*[2.5, 2.5, 4, 1.5, 4, 2.5, 4] - [1.25, 1.25, 2.0, .75, 2.0, .75, 2.0]
+        velA = np.random.rand(1,7)[0]*[3.0,3.0,3.0,3.0,6.0,3.0,6.0] - [1.5,1.5,1.5,1.5,2,1.5,2]
         node = nearest_neighbor(jointsA, velA, treeA, i)
         treeA = insert_vertex(node,treeA,jointsA,velA,i,1)
         edgesA = insert_edge(edgesA, node, i)
 
-        jointsB = np.random.rand(1,7)[0]*[2.5, 2.5, 4, 1.5, 4, 2.5, 4] - [1.25, 1.25, 2.0, .75, 2.0, 1.25, 2.0]
-        velB = np.random.rand(1,7)[0]*[3.0,3.0,3.0,3.0,6.0,6.0,6.0] - [1.5,1.5,1.5,1.5,2,2,2]
+        jointsB = np.random.rand(1,7)[0]*[2.5, 2.5, 4, 1.5, 4, 2.5, 4] - [1.25, 1.25, 2.0, .75, 2.0, .75, 2.0]
+        velB = np.random.rand(1,7)[0]*[3.0,3.0,3.0,3.0,6.0,3.0,6.0] - [1.5,1.5,1.5,1.5,2,1.5,2]
         node = nearest_neighbor(jointsB, velB, treeB, i)
         treeB = insert_vertex(node,treeB,jointsB,velB,i,1)
         edgesB = insert_edge(edgesB, node, i)

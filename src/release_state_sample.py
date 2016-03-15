@@ -10,8 +10,8 @@ x_range = [.6,.8] # near x position of catcher
 y_range = [-.62,0] # between start position and catch position
 z_range = [.1,.4] # between catch position and high position of hand
 vel_range_x = [0,.1] # need to experiment with these ranges
-vel_range_y = [.3, 1.5] # needs minimum velocity for liftoff but can't be so high that JTAS will fail
-vel_range_z = [0, 1.5]
+vel_range_y = [.6, 1.5] # needs minimum velocity for liftoff but can't be so high that JTAS will fail
+vel_range_z = [0, .5]
 cup_height = .12
 block_height = .018
 block_width = .047
@@ -63,9 +63,9 @@ def test_pos(catch_x, catch_y, catch_z):
 
 def find_velocity_param(dx,dy,dz, rand):
     alpha_min = atan2(dz,dy)
-    if alpha_min <= (-pi/2 + .01):
-        alpha_min = -pi/2 + .01
-    alpha_max = 75*pi/180
+    if alpha_min <= (-pi/8 + .01):
+        alpha_min = -pi/8 + .01
+    alpha_max = 25*pi/180
     inc = 0
     alpha_list = []
     v_list = []

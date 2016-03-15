@@ -8,22 +8,37 @@ from pykdl_utils.kdl_kinematics import KDLKinematics
 from math import sin, cos
 import matplotlib.pyplot as plt
 
-catch_x = .68
+catch_x = .85
 catch_z = -.6 # range from - .5 to 0 # lower range determined by baxter
-catch_y = .7 # range from .29 to .5, works after .5 but hard to find solutions
+catch_y = .7 # range from -.3 to .7, works after .5 but hard to find solutions
 
 def main():
+    plt.close('all')
+    plt.figure(facecolor='w')
+    plt.hold(True)
+    for i in range(30):
+        throw_y, throw_z, vel, alpha = find_feasible_release(catch_x, catch_y, catch_z)
+    # print throw_y, throw_z, vel, alpha
+        block_width = .047
+        dy = catch_y - throw_y - block_width
+        t = np.linspace(0,dy/(vel*cos(alpha)),100)
+        traj_y = vel*cos(alpha)*t + throw_y;
+        traj_z = -.5*9.8*t**2 + vel*sin(alpha)*t + throw_z
+        plt.plot(traj_y,traj_z,'b',alpha=.3)
+        plt.plot(traj_y[0],traj_z[0],'b.',markersize=15,alpha = .3)
+        plt.ylim([(catch_z - .2), .4])
     throw_y, throw_z, vel, alpha = find_feasible_release(catch_x, catch_y, catch_z)
-    print throw_y, throw_z, vel, alpha
     block_width = .047
     dy = catch_y - throw_y - block_width
     t = np.linspace(0,dy/(vel*cos(alpha)),100)
     traj_y = vel*cos(alpha)*t + throw_y;
     traj_z = -.5*9.8*t**2 + vel*sin(alpha)*t + throw_z
-    plt.close('all')
-    plt.figure()
-    plt.plot(traj_y,traj_z,'.')
-    plt.ylim([-.7, .4])
+    plt.plot(traj_y,traj_z,'r',linewidth=2)
+    plt.plot(traj_y[0],traj_z[0],'r.',markersize=15)
+    plt.ylim([-.6, .5])
+    plt.xlabel('Y position (m)')
+    plt.ylabel('Z position (m)')
+    plt.title('Trajectories for sample release position, velocity, and angle')
     plt.show(block=False)
 
 def find_feasible_release(catch_x, catch_y, catch_z):
@@ -38,6 +53,7 @@ def find_feasible_release(catch_x, catch_y, catch_z):
         if ik_test:
             if test_joint_vel(q_ik, vel, alpha, kdl_kin):
                 found = True
+        print q_ik
 
     return throw_y, throw_z, vel, alpha
 
@@ -51,9 +67,16 @@ def sample_state(catch_x, catch_y, catch_z):
     throw_pos = np.array([throw_x, throw_y, throw_z])
     th_init = np.array([ 0.47668453, -0.77274282,  0.93150983,  2.08352941,  0.54149522,
        -1.26745163, -2.06742261]) # experimentally determined
-    R_init = np.array([[-0.11121663, -0.14382586,  0.98333361], # experimentally determined
-       [-0.95290138,  0.2963578 , -0.06442835],
-       [-0.28215212, -0.94418546, -0.17001177]])
+    th_init = np.array([0, 0, 0, 0, 0, 0, 0])
+    # th_init = np.array([-0.94950956,  0.85330416,  1.50162505,  1.65105923,  2.8575804 ,
+        # 0.01964355,  0.14972377])
+    # R_init = np.array([[-0.11121663, -0.14382586,  0.98333361], # experimentally determined
+    #    [-0.95290138,  0.2963578 , -0.06442835],
+    #    [-0.28215212, -0.94418546, -0.17001177]])
+    R_init = np.array([[ 0.06713617, -0.05831221,  0.99603836],
+        [-0.97267055, -0.22621871,  0.05231732],
+        [ 0.22227178, -0.97232956, -0.07190603]])
+
     X = RpToTrans(R_init, throw_pos)
     return X, th_init, throw_y, throw_z, vel, alpha
 
