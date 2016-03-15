@@ -11,10 +11,10 @@ from functions import RpToTrans
 
 
 catch_x = .8
-catch_y = .7 # .7
+# catch_y = .1 # .7
 catch_z = -.6 # -.6 # range from - .5 to 0 # lower range determined by baxter
 
-def find_path(plot):
+def find_path(plot, pos):
 
     # Set initial position
     pos_init = [-.62, -.1, 0, 0]
@@ -25,7 +25,13 @@ def find_path(plot):
     #    -1.16889336, 2.23])
 
     # Find goal for throwing
-    pos_goal = find_feasible_release(catch_x, catch_y, catch_z)
+    if pos == 1:
+        catch_y = .7
+    elif pos == 2:
+        catch_y = .1
+    elif pos == 3:
+        catch_y = .3
+    pos_goal = find_feasible_release(catch_x, catch_y, catch_z, pos)
     print('found release state')
     print pos_goal
 

@@ -44,18 +44,22 @@ def plot_results():
     ax.set_title(title)
     plt.show(block=False)
 
-def test_pos(catch_x, catch_y, catch_z):
-    if catch_y == .3:
-        print 3
+def test_pos(catch_x, catch_y, catch_z, pos):
+    if pos == 3:
         x_range = [.6,.8] # near x position of catcher
         y_range = [-.1,0] # between start position and catch position
         z_range = [.2,.3] # between catch position and high position of hand
-    elif catch_y == .7:
+    elif pos == 1:
         print 1
         x_range = [.6,.8] # near x position of catcher
         y_range = [-.15,0] # between start position and catch position
         z_range = [.3,.4] # between catch position and high position of hand
-        
+    if pos == 2:
+        print 2
+        x_range = [.6,.8] # near x position of catcher
+        y_range = [-.3,0] # between start position and catch position
+        z_range = [.25,.4] # between catch position and high position of hand
+
     throw_x = random()*(x_range[1] - x_range[0]) + x_range[0]
     throw_y = random()*(y_range[1] - y_range[0]) + y_range[0]
     throw_z = random()*(z_range[1] - z_range[0]) + z_range[0]
@@ -63,23 +67,30 @@ def test_pos(catch_x, catch_y, catch_z):
     dy = catch_y - throw_y - block_width
     dz = catch_z + cup_height - throw_z - block_height
     rand = random()
-    if find_velocity_param(dx, dy, dz, rand, catch_y):
-        vel, alpha = find_velocity_param(dx, dy, dz, rand, catch_y)
+    if find_velocity_param(dx, dy, dz, rand, pos):
+        vel, alpha = find_velocity_param(dx, dy, dz, rand, pos)
         return [throw_y, throw_z, vel, alpha]
 
-def find_velocity_param(dx,dy,dz, rand, catch_y):
-    if catch_y == .3:
-        print 3
+def find_velocity_param(dx,dy,dz, rand, pos):
+    if pos == 3:
+        # print 3
         vel_range_x = [0,.1] # need to experiment with these ranges
         vel_range_y = [.6, 1] # needs minimum velocity for liftoff but can't be so high that JTAS will fail
         vel_range_z = [0, .5]
         alpha_max = 10*pi/180
-    elif catch_y == .7:
-        print 1
+    elif pos == 1:
+        # print 1
         vel_range_x = [0,.1] # need to experiment with these ranges
         vel_range_y = [.3, 1.5] # needs minimum velocity for liftoff but can't be so high that JTAS will fail
         vel_range_z = [0, 1.5]
         alpha_max = 25*pi/180
+    elif pos == 2:
+        # print 2
+        vel_range_x = [0,.1] # need to experiment with these ranges
+        vel_range_y = [.3, 1.5] # needs minimum velocity for liftoff but can't be so high that JTAS will fail
+        vel_range_z = [0, 1.5]
+        alpha_max = 10*pi/180
+
     alpha_min = atan2(dz,dy)
     if alpha_min <= (-pi/2 + .01):
         alpha_min = -pi/2 + .01

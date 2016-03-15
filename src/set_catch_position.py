@@ -13,25 +13,33 @@ from std_msgs.msg import Int16
 from functions import JointTrajectory
 from functions import RpToTrans
 
-def main():
+def sub_cb(data):
+    rospy.loginfo(data)
+    move_to(data.data)
 
+def move_to(pos):
 
-    rospy.init_node('set_catch_position')
-    pos = rospy.get_param('~pos',1)
+    pub_demo_state = rospy.Publisher('demo_state',Int16, queue_size = 10)
 
     if (pos == 1):
         catch = np.array([.65, .25, 0]) # my .7?
+        R = np.array([[ 0.26397895, -0.34002068,  0.90260791],
+        [-0.01747676, -0.93733484, -0.34799134],
+        [ 0.96437009,  0.07608772, -0.25337913]])
     elif (pos == 2):
-        catch = np.array([.68, .1, 0])
+        catch = np.array([.68, -.05, 0])
+        R = np.array([[0,0,1],[0,-1,0],[1,0,0]])
     elif (pos == 3):
         catch = np.array([.72, .1, 0])
+        R = np.array([[ 0.26397895, -0.34002068,  0.90260791],
+        [-0.01747676, -0.93733484, -0.34799134],
+        [ 0.96437009,  0.07608772, -0.25337913]])
     else:
         pass
 
     th_init = np.array([-.3048, -.2703, -.1848, 1.908, .758, -1.234, -3.04]) 
-    R = np.array([[ 0.26397895, -0.34002068,  0.90260791],
-        [-0.01747676, -0.93733484, -0.34799134],
-        [ 0.96437009,  0.07608772, -0.25337913]])
+
+    # R = np.array([[0,0,1],[0,-1,0],[1,0,0]])
 
     X = RpToTrans(R,catch)
 
@@ -61,8 +69,20 @@ def main():
     limb_interface.move_to_joint_positions(angles)
     # rospy.sleep(5)
     print 'done'
+    pub_demo_state.publish(1)
 
-    # rospy.spin()   
+
+def main():
+
+
+    rospy.init_node('set_catch_position')
+    sub_pos_state = rospy.Subscriber('pos_state', Int16, sub_cb)
+
+    # pos = rospy.get_param('~pos',1)
+
+
+
+    rospy.spin()   
         
 if __name__ == "__main__":
     try:

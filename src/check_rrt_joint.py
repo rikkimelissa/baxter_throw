@@ -21,6 +21,22 @@ class Checker(object):
         self._pub_traj = rospy.Publisher('joint_traj',numpy_msg(Float32MultiArray), queue_size = 10)
         self._iter = 0
         self._executing = True
+        self._sub_demo_state = rospy.Subscriber('demo_state', Int16, self.sub_demo)
+        self._sub_pos_state = rospy.Subscriber('pos_state', Int16, self.sub_pos)    
+
+    def sub_pos(self,a):
+        rospy.loginfo('received pos')
+        rospy.loginfo(a)
+        self._pos_state = a.data
+
+    def sub_demo(self,a):
+        rospy.loginfo(a)
+        rospy.loginfo('received start command')
+        self._iter = 0
+        self._start = rospy.get_time()
+        self._path = find_path(False, self._pos_state)
+        rospy.loginfo('path found')
+        self.publish_joints()
 
     def sub_cb(self,a):
         # rospy.loginfo(a)
@@ -50,6 +66,7 @@ class Checker(object):
 
     def publish_traj(self):
 
+        rospy.loginfo('publishing traj')
         if (self._traj[:,6] > -1.9).all():
             a = Float32MultiArray()
             N = self._traj.shape[0]
@@ -67,7 +84,7 @@ class Checker(object):
             self._pub_traj.publish(a)   
         else:
             rospy.loginfo("trying again")
-            self._path = find_path(False)
+            self._path = find_path(False, self._pos_state)
             self._iter = 0
             self.publish_joints()
  
@@ -81,7 +98,7 @@ class Checker(object):
     #     self._pub_path.publish(a)
 
     def find_new_path(self):
-        self._path = find_path(False)
+        self._path = find_path(False, self._pos_state)
         self.publish_joints()
 
     def publish_joints(self):
@@ -184,13 +201,8 @@ def main():
     rospy.init_node('jsc_publisher')
     rate = rospy.Rate(60)    
     check = Checker()
-    check._start = rospy.get_time()
-    check._path = find_path(False)
-    rospy.loginfo('path found')
-    check.publish_joints()
 
-    while(check._executing):
-        rospy.spin()
+    rospy.spin()
     
 if __name__ == "__main__":
     try:

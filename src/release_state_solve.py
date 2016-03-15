@@ -27,7 +27,7 @@ def main():
     #     plt.plot(traj_y,traj_z,'b',alpha=.3)
     #     plt.plot(traj_y[0],traj_z[0],'b.',markersize=15,alpha = .3)
     #     plt.ylim([(catch_z - .2), .4])
-    throw_y, throw_z, vel, alpha = find_feasible_release(catch_x, catch_y, catch_z)
+    throw_y, throw_z, vel, alpha = find_feasible_release(catch_x, catch_y, catch_z, pos)
     block_width = .047
     dy = catch_y - throw_y - block_width
     t = np.linspace(0,dy/(vel*cos(alpha)),100)
@@ -41,14 +41,14 @@ def main():
     plt.title('Trajectories for sample release position, velocity, and angle')
     plt.show(block=False)
 
-def find_feasible_release(catch_x, catch_y, catch_z):
+def find_feasible_release(catch_x, catch_y, catch_z, pos):
     found = False;
     robot = URDF.from_parameter_server()
     base_link = robot.get_root()
     kdl_kin = KDLKinematics(robot, base_link, 'right_gripper_base')
 
     while not found:
-        X, th_init, throw_y, throw_z, vel, alpha = sample_state(catch_x, catch_y, catch_z)
+        X, th_init, throw_y, throw_z, vel, alpha = sample_state(catch_x, catch_y, catch_z, pos)
         ik_test, q_ik = test_for_ik(X, th_init, kdl_kin)
         if ik_test:
             if test_joint_vel(q_ik, vel, alpha, kdl_kin):
@@ -57,10 +57,10 @@ def find_feasible_release(catch_x, catch_y, catch_z):
 
     return throw_y, throw_z, vel, alpha
 
-def sample_state(catch_x, catch_y, catch_z):
-    res = test_pos(catch_x, catch_y, catch_z)
+def sample_state(catch_x, catch_y, catch_z, pos):
+    res = test_pos(catch_x, catch_y, catch_z, pos)
     while res == None:
-        res = test_pos(catch_x, catch_y, catch_z)
+        res = test_pos(catch_x, catch_y, catch_z, pos)
     throw_y = res[0]; throw_z = res[1]; vel = res[2]; alpha = res[3]
 
     throw_x = .68;

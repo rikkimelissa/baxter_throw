@@ -66,5 +66,8 @@
 
   <!-- start nodes -->
   <node name="throw" pkg="baxter_throw" type="throw_path.py" output="screen"/>
+  <node name="set_catch_position" pkg="baxter_throw" type="set_catch_position.py" output="screen"/>
+  <node name="collision_publisher" pkg="baxter_throw" type="check_rrt_joint.py" output="screen"/>
+  <node name="input_state" pkg="baxter_throw" type="input_state.py" output="screen" launch-prefix="xterm -e" respawn="true"/>
 
 </launch>
