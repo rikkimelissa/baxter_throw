@@ -27,7 +27,7 @@ An example is shown below of 30 sampled release points and their trajectories; t
 ![](https://raw.githubusercontent.com/rikkimelissa/baxter_throw/master/src/images/final_sample_release_points.png)
 
 #### Kinodynamic RRT  <a name="Movement"></a>
-This task finds a path from a given start position and velocity to the sampled position and velocity for each of Baxter's seven joints while obeying phsically-based dynamic models and avoiding position and velocity limits. This approach is tailored to trajectory planning in high-dimensional state spaces and is therefore a good approach for the 14-DOF system. It utilizes a bidirectional RRT to speed up the sampling process.
+This task finds a path from a given start position and velocity to the sampled position and velocity for each of Baxter's seven joints while obeying physically-based dynamic models and avoiding position and velocity limits. This approach is tailored to trajectory planning in high-dimensional state spaces and is therefore a good approach for the 14-DOF system. It utilizes a bidirectional RRT to speed up the sampling process.
 
 An example is shown below for a 2-DOF system using a bidirectional kinodynamic RRT and the resulting path.
 
@@ -38,14 +38,14 @@ When extended to 14-DOF, the RRT results in paths like the one below which shows
 ![](https://raw.githubusercontent.com/rikkimelissa/baxter_throw/master/src/images/iter_0.png)
 
 #### Lazy collision checking  <a name="fine"></a>
-Once a path has been found that connects the start and release states with a dynamically feasible trajectory, collisions are checked for each point along the path. The planner is lazy in that the path is found prior to collision checking as collision checking tends to be the most computationally intensive constraint to check. Collision checking using the built in service from MoveIt!.
+Once a path has been found that connects the start and release states with a dynamically feasible trajectory, collisions are checked for each point along the path. The planner is lazy in that the path is found prior to collision checking as collision checking tends to be the most computationally intensive constraint to check. Collision checking uses the built in service from MoveIt!.
 
 #### Path smoothing <a name="drop"></a>
 This tasks employs a shortcutting method to smooth jerky trajectories for high DOF manipulators subject to collision constraints, velocity bounds, and acceleration bounds. This algorithm first converts the path to a trajectory over time using a 5th order spline that respects state conditions and velocity and acceleration limits. The shortcutting algorithm is then employed over 30 iterations: for each iteration, two random states are picked from the trajectory. The minimum execution time is determined by the slowest single-joint trajetory using the fastest dynamically feasible trajectory between joint states. Once this time has been determined, the rest of the joints are interpolated for this time using the minimum-acceleration interpolant. This new segment replaces the old segment only if the overall time for execution has been reduced.
 
 Below is an example of the shortcutting method over 30 iterations. It smooths the path and reduces the overall time.
 
-![](https://raw.githubusercontent.com/rikkimelissa/baxter_throw/master/src/images/final_progression.png)
+![](https://raw.githubusercontent.com/rikkimelissa/baxter_throw/master/src/images/final_progression3.png)
 
 #### Important nodes <a name="nodes"></a>
 * `check_rrt_joint.py` iterates through RRT and path smoothing and sends results to the collision checker
