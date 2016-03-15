@@ -11,6 +11,7 @@ from math import sqrt
 
 def main():
     met = False
+    plt.close('all')
     f, axarr = plt.subplots(2, 2,facecolor='w')
     while (met == False):
         path = find_path(False);
@@ -67,12 +68,12 @@ def main():
                             title = "Iterations = " + str(i+1)
                             axarr[0,1].set_title(title)
                             plot = 1
-                        elif plot == 1:
+                        elif plot == 1 and i > 3:
                             axarr[1,0].plot(traj[:,0],traj[:,1:8])
                             title = "Iterations = " + str(i+1)
                             axarr[1,0].set_title(title)
                             plot = 2
-                        elif plot == 2:
+                        elif plot == 2 and i > 10:
                             axarr[1,1].plot(traj[:,0],traj[:,1:8])
                             title = "Iterations = " + str(i+1)
                             axarr[1,1].set_title(title)
@@ -83,14 +84,14 @@ def main():
         else:
             print "trying again"
 
-    plt.figure()
-    plt.plot(traj[:,0],traj[:,1:8])
-    plt.show(block=False)
-    plt.figure()
-    plt.plot(traj[:,0],traj[:,8:15],'.')
-    plt.show(block=False)
-    plt.figure()
-    plt.plot(traj[:,0],traj[:,15:],'.')
+    # plt.figure()
+    # plt.plot(traj[:,0],traj[:,1:8])
+    # plt.show(block=False)
+    # plt.figure()
+    # plt.plot(traj[:,0],traj[:,8:15],'.')
+    # plt.show(block=False)
+    # plt.figure()
+    # plt.plot(traj[:,0],traj[:,15:],'.')
     plt.show(block=False)
 
 
