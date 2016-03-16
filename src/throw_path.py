@@ -11,13 +11,9 @@ Baxter JTAS throw_path
 """
 import argparse
 import sys
-
 from copy import copy
-
 import rospy
-
 import actionlib
-
 from control_msgs.msg import (
     FollowJointTrajectoryAction,
     FollowJointTrajectoryGoal,
@@ -25,17 +21,13 @@ from control_msgs.msg import (
 from trajectory_msgs.msg import (
     JointTrajectoryPoint,
 )
-
 import baxter_interface
-
 from baxter_interface import CHECK_VERSION
-
 from functions import JointTrajectory
 import numpy as np
 from solve_linear_system import linearSpace
 from std_msgs.msg import Float32MultiArray
 from rospy.numpy_msg import numpy_msg
-
 import matplotlib.pyplot as plt
 
 
@@ -61,8 +53,6 @@ class Trajectory(object):
         self._limb_interface = baxter_interface.limb.Limb('right')
         self._q_start = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
        -1.16889336, -0.90888362])
-        # self._q_start = np.array([-0.94950956,  0.85330416,  1.50162505,  1.65105923,  2.8575804 ,
-        # 0.01964355,  0.14972377])
         self.clear(limb)
 
     def add_point_p(self, positions, time):
@@ -121,14 +111,6 @@ class Trajectory(object):
         self._pArm = pMat[:,1:8]
         self._vArm = pMat[:,8:15]
         self._aArm = pMat[:,15:]
-
-        # plt.close('all')
-        # plt.figure()
-        # plt.plot(self._time, self._pArm)
-        # plt.figure()
-        # plt.plot(self._time, self._vArm)
-        # plt.show(block=False)
-
         self.execute_traj()    
 
     def execute_path(self):
@@ -142,8 +124,6 @@ class Trajectory(object):
 
         for i in range(N):
             self.add_point_pv(self._pArm[i,:].tolist(), self._vArm[i,:].tolist(),t_all[i])
-            # self.add_point_p(self._pArm[i,:].tolist(),t_all[i])
-        # traj.add_point_p(thList[i,:].tolist(), t_all[i])
         self.start()
         self.wait(10)
         self.clear('right')
@@ -158,8 +138,6 @@ class Trajectory(object):
 
         for i in range(N):
             self.add_point(self._pArm[i,:].tolist(), self._vArm[i,:].tolist(), self._aArm[i,:].tolist(), self._time[i]+self._t_delay+1)
-            # self.add_point_p(self._pArm[i,:].tolist(), self._time[i]+self._t_delay+1)
-        # traj.add_point_p(thList[i,:].tolist(), t_all[i])
 
         end_point = np.array([0.2331650797585829,
  -0.6308495990178764,
@@ -168,13 +146,6 @@ class Trajectory(object):
  -0.20363594959178868,
  -1.2256506495204456,
  -.87])
-     #        q_set = np.array([0.2331650797585829,
-     # -0.6308495990178764,
-     # 0.5399612373356656,
-     # 2.121495429645527,
-     # -0.20363594959178868,
-     # -1.2256506495204456,
-     # 2.27])
         self.add_point_p(end_point.tolist(),self._t_delay + 5)
         self.start()
         self.wait(10)
@@ -188,13 +159,8 @@ def main():
     traj = Trajectory('right')
     traj._t_delay = 5.0
     rospy.on_shutdown(traj.stop)
-    # Command Current Joint Positions first
 
     rospy.spin()
-
-
-    print("Exiting - Joint Trajectory Action Test Complete")
-
 
 if __name__ == "__main__":
     main()

@@ -8,6 +8,10 @@ The main goal of this project was to generate kindynamic trajectories using an R
 * Check the RRT path for self collisions
 * Smooth the path and generate time-optimal, minimum-acceleration trajectories for each joint to follow
 
+See a demo of the robot throwing a ball to three distinct positions here:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/rpvsrdLKdGM" frameborder="0" allowfullscreen></iframe> 
+
 This implementation relies on work from the following sources:
 
 > Zhang, Yajia, Jingru Luo, and Kris Hauser. "Sampling-based motion planning with dynamic intermediate state objectives: Application to throwing." Robotics and Automation (ICRA), 2012 IEEE International Conference on. IEEE, 2012.

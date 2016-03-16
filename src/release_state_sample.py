@@ -5,13 +5,7 @@ from random import random
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# Define range and static variables
-# x_range = [.6,.8] # near x position of catcher
-# y_range = [-.62,0] # between start position and catch position
-# z_range = [.1,.4] # between catch position and high position of hand
-# vel_range_x = [0,.1] # need to experiment with these ranges
-# vel_range_y = [.3, 1.5] # needs minimum velocity for liftoff but can't be so high that JTAS will fail
-# vel_range_z = [0, 1.5]
+# Define static variables
 cup_height = .12
 block_height = .018
 block_width = .047

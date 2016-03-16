@@ -16,17 +16,6 @@ def main():
     plt.close('all')
     plt.figure(facecolor='w')
     plt.hold(True)
-    # for i in range(30):
-    #     throw_y, throw_z, vel, alpha = find_feasible_release(catch_x, catch_y, catch_z)
-    # # print throw_y, throw_z, vel, alpha
-    #     block_width = .047
-    #     dy = catch_y - throw_y - block_width
-    #     t = np.linspace(0,dy/(vel*cos(alpha)),100)
-    #     traj_y = vel*cos(alpha)*t + throw_y;
-    #     traj_z = -.5*9.8*t**2 + vel*sin(alpha)*t + throw_z
-    #     plt.plot(traj_y,traj_z,'b',alpha=.3)
-    #     plt.plot(traj_y[0],traj_z[0],'b.',markersize=15,alpha = .3)
-    #     plt.ylim([(catch_z - .2), .4])
     throw_y, throw_z, vel, alpha = find_feasible_release(catch_x, catch_y, catch_z, pos)
     block_width = .047
     dy = catch_y - throw_y - block_width
@@ -67,30 +56,9 @@ def sample_state(catch_x, catch_y, catch_z, pos):
     throw_pos = np.array([throw_x, throw_y, throw_z])
     th_init = np.array([ 0.47668453, -0.77274282,  0.93150983,  2.08352941,  0.54149522,
        -1.26745163, -2.06742261]) # experimentally determined
- #    # flipped starting location
- #    th_init = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
- #       -1.16889336, .89])
- #    th_init = np.array([0.5065971551991579,
- # -0.9644904203829539,
- # 0.5472476460781214,
- # 2.2047138873883108,
- # 0.1342233189399737,
- # -1.2233496783386175,
- # -2.2518837966157874])
     R_init = np.array([[ 0.06713617, -0.05831221,  0.99603836],
         [-0.97267055, -0.22621871,  0.05231732],
         [ 0.22227178, -0.97232956, -0.07190603]])
-    # # flipped ending orientation
-    # R_init = np.array([[-0.05154769, -0.02369375,  0.99838942],
-    #     [ 0.9421129 ,  0.33050364,  0.05648559],
-    #     [-0.33130969,  0.94350726,  0.00528549]])
-    # R_init = np.array([[ 0.04276406,  0.0272318 ,  0.99871401],
-    #     [-0.94477517, -0.32399151,  0.04928868],
-    #     [ 0.32491708, -0.94566798,  0.01187273]])
-    # R_init = np.array([[ 0.04304468,  0.02723819,  0.99870178],
-    #     [-0.94506274, -0.32311249,  0.0495452],
-    #     [ 0.32404254, -0.9459685 ,  0.01183352]])
-
 
     X = RpToTrans(R_init, throw_pos)
     return X, th_init, throw_y, throw_z, vel, alpha

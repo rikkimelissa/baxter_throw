@@ -72,14 +72,6 @@ class Checker(object):
             N = self._traj.shape[0]
             data = np.reshape(self._traj,(N*22,1))
             a.data = np.array(data, dtype = np.float32)
-            # plt.figure()
-            # plt.plot(self._traj[:,0],self._traj[:,1:8],'.')
-            # plt.figure()
-            # plt.plot(self._traj[:,0],self._traj[:,8:15],'.')
-            # plt.figure()
-            # plt.plot(self._traj[:,0],self._traj[:,15:],'.')
-            # plt.show(block=False)
-            # rospy.loginfo('publishing traj')
             rospy.loginfo(rospy.get_time() - self._start)
             self._pub_traj.publish(a)   
         else:
@@ -87,15 +79,6 @@ class Checker(object):
             self._path = find_path(False, self._pos_state)
             self._iter = 0
             self.publish_joints()
- 
-
-    # def publish_path(self):
-    #     a = Float32MultiArray()
-    #     N = self._path.shape[0]
-    #     data = np.reshape(self._path,(N*14,1))
-    #     a.data = np.array(data, dtype = np.float32)
-    #     # rospy.loginfo('publishing path')
-    #     self._pub_path.publish(a)
 
     def find_new_path(self):
         self._path = find_path(False, self._pos_state)
@@ -108,9 +91,6 @@ class Checker(object):
         thList_all = np.hstack((np.zeros((N,1)),thList_arms))
         data = np.reshape(thList_all,(N*15,1))
         a.data = np.array(data, dtype = np.float32)
-        # rospy.loginfo(self._path.shape)
-        # rospy.loginfo('checking collision')
-        # rospy.loginfo(a)
         self._pub_joints.publish(a)   
         rospy.loginfo ('published RRT')
 
@@ -120,7 +100,6 @@ class Checker(object):
         thList_all = np.hstack((np.array([0]),thList_arms))
         data = np.reshape(thList_all,(15,1))
         a.data = np.array(data, dtype = np.float32)
-        # rospy.loginfo('checking segment')
         self._pub_joints.publish(a)  
 
     def replace_segment(self):
@@ -132,10 +111,6 @@ class Checker(object):
             self._traj = np.delete(self._traj,range(int(self._ind1),int(self._ind2+1)),0)
             self._traj[self._ind1:,0] += new_dur - old_dur
             self._traj = np.insert(self._traj,self._ind1,self._s,0)
-            # plt.figure()
-            # plt.plot(self._traj[:,0],self._traj[:,1:8])
-            # plt.plot(self._traj[:,0],self._traj[:,8:])
-            # plt.show(block=False)
         else:
             self._iter -=1
         if self._iter < 30:

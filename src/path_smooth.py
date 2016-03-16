@@ -16,22 +16,11 @@ def main():
     while (met == False):
         path = find_path(False);
         traj, path_orig = path2traj(path);
-        # plt.close('all')
-        # plt.figure()
-        # axarr[0,0].plot(traj[:,0],traj[:,1:8])
-        # axarr[0,0].set_title('Iterations = 0')
-        # plt.show(block=False)
-        # plt.figure()
-        # plt.plot(traj[:,0],traj[:,9:])
-        # plt.show(block=False)
         iter = 30
         plot = 0
         for i in range(iter):
             print i
             path_length = traj.shape[0]
-            # print i, path_length
-            # if (path_length == 0):
-            #     break
             if i == 0:
                 print "chose the first"
                 ind1 = 0
@@ -54,8 +43,6 @@ def main():
                 vertex2 = traj[ind2,:]
                 if np.isfinite(vertex1).all() and np.isfinite(vertex2).all() and (vertex1 < 10).all() and (vertex2 < 10).all():
                     s = shortcut(vertex1,vertex2)
-                    # if (collision_free(s)):
-                    # replace segment in path
                     old_dur = vertex2[0] - vertex1[0]
                     new_dur = s[-1,0] - s[0,0]
                     if new_dur < old_dur:
@@ -63,21 +50,6 @@ def main():
                         traj = np.delete(traj,range(int(ind1),int(ind2+1)),0)
                         traj[ind1:,0] += new_dur - old_dur
                         traj = np.insert(traj,ind1,s,0)
-                        # if plot == 0:
-                        #     axarr[0,1].plot(traj[:,0],traj[:,1:8])
-                        #     title = "Iterations = " + str(i+1)
-                        #     axarr[0,1].set_title(title)
-                        #     plot = 1
-                        # elif plot == 1 and i > 3:
-                        #     axarr[1,0].plot(traj[:,0],traj[:,1:8])
-                        #     title = "Iterations = " + str(i+1)
-                        #     axarr[1,0].set_title(title)
-                        #     plot = 2
-                        # elif plot == 2 and i > 10:
-                        #     axarr[1,1].plot(traj[:,0],traj[:,1:8])
-                        #     title = "Iterations = " + str(i+1)
-                        #     axarr[1,1].set_title(title)
-                        #     plot = 3
         if (traj[:,6] > -1.6).all():
             # print traj[:,6]
             met = True
@@ -86,12 +58,6 @@ def main():
 
     plt.figure()
     plt.plot(traj[:,0],traj[:,1:8])
-    # plt.show(block=False)
-    # plt.figure()
-    # plt.plot(traj[:,0],traj[:,8:15],'.')
-    # plt.show(block=False)
-    # plt.figure()
-    # plt.plot(traj[:,0],traj[:,15:],'.')
     plt.show(block=False)
 
 
@@ -104,9 +70,6 @@ def shortcut(vertex1, vertex2):
         if i > 3:
             v_max = 3.0
             a_max = 3.0
-        # if i == 5:
-        #     v_max = 1.0
-        #     a_max = 1.0
         t = execution_time(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,a_max)
         if t > T:
             T = t
@@ -115,17 +78,7 @@ def shortcut(vertex1, vertex2):
         if i > 3:
             v_max = 3.0
             a_max = 3.0
-        # if i == 5:
-        #     v_max = 1.0
-        #     a_max = 1.0
-        # print i, vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,T
         time, pos, vel, acc = traj_min_acc(vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8],v_max,T)
-        # print vertex1[i+1], vertex2[i+1],vertex1[i+8],vertex2[i+8]
-        # plt.close('all')
-        # plt.plot(time,pos)
-        # plt.plot(time,vel)
-        # plt.show(block=False)
-
         s[:,i+1] = pos
         s[:,i+8] = vel
         s[:,i+15] = acc

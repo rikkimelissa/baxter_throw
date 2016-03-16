@@ -39,8 +39,6 @@ def move_to(pos):
 
     th_init = np.array([-.3048, -.2703, -.1848, 1.908, .758, -1.234, -3.04]) 
 
-    # R = np.array([[0,0,1],[0,-1,0],[1,0,0]])
-
     X = RpToTrans(R,catch)
 
     # Find end joint angles with IK
@@ -58,11 +56,8 @@ def move_to(pos):
     q_goal = q_ik
     print q_goal
 
-    # limb_interface = baxter_interface.limb.Limb('right')
     limb_interface = baxter_interface.limb.Limb('left')
-
     angles = limb_interface.joint_angles()
-
     for ind, joint in enumerate(limb_interface.joint_names()):
         angles[joint] = q_goal[ind]    
 
@@ -74,13 +69,8 @@ def move_to(pos):
 
 def main():
 
-
     rospy.init_node('set_catch_position')
     sub_pos_state = rospy.Subscriber('pos_state', Int16, sub_cb)
-
-    # pos = rospy.get_param('~pos',1)
-
-
 
     rospy.spin()   
         
