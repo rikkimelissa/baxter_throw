@@ -70,4 +70,4 @@ Below is an example of the shortcutting method over 30 iterations. It smooths th
 
 #### Instructions for running files  <a name="Instructions"></a>
 
-To run the files, the workspace must be connected to Baxter and properly sourced. Then use the following command: `roslaunch baxter_throw baxter_vis_launch.launch`
+To run the files, the workspace must be connected to Baxter and properly sourced. Then use the following command: `roslaunch baxter_throw throw_demo.launch`
