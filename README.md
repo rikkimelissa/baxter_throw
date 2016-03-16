@@ -10,7 +10,8 @@ The main goal of this project was to generate kindynamic trajectories using an R
 
 See a demo of the robot throwing a ball to three distinct positions here:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/rpvsrdLKdGM" frameborder="0" allowfullscreen></iframe> 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=rpvsrdLKdGM" target="_blank"><img src="http://img.youtube.com/vi/rpvsrdLKdGM/0.jpg" 
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 This implementation relies on work from the following sources:
 
