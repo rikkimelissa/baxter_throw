@@ -5,6 +5,7 @@
   <version>0.0.0</version>
   <description>The baxter_throw package</description>
   <maintainer email="rikkiirwin@gmail.com">rikki</maintainer>
+  <license> None </license>
 
   <buildtool_depend>catkin</buildtool_depend>
 
