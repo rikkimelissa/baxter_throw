@@ -44,12 +44,12 @@ def test_pos(catch_x, catch_y, catch_z, pos):
         y_range = [-.1,0] # between start position and catch position
         z_range = [.2,.3] # between catch position and high position of hand
     elif pos == 1:
-        print 1
+        # print 1
         x_range = [.6,.8] # near x position of catcher
         y_range = [-.15,0] # between start position and catch position
         z_range = [.3,.4] # between catch position and high position of hand
     if pos == 2:
-        print 2
+        # print 2
         x_range = [.6,.8] # near x position of catcher
         y_range = [-.3,0] # between start position and catch position
         z_range = [.25,.4] # between catch position and high position of hand

@@ -35,7 +35,8 @@ class Checker(object):
         self._plot_demo = get_param('plot_demo', False)
         rospy.loginfo("Here's my demo state: ")
         rospy.loginfo(self._plot_demo)
-
+        self._plotIndex = -1
+        
     def sub_pos(self,a):
         rospy.loginfo('received pos')
         rospy.loginfo(a)
@@ -56,6 +57,7 @@ class Checker(object):
             if (a.data):
                 rospy.loginfo('RRT path checked')
                 self._iter = 1;
+                self._plotIndex = -1
                 self._traj, path_orig = path2traj(self._path)
                 self.smooth_path()
             else:
@@ -119,10 +121,44 @@ class Checker(object):
         old_dur = self._vertex2[0] - self._vertex1[0]
         new_dur = self._s[-1,0] - self._s[0,0]
         if new_dur < old_dur:
+            if (self._plot_demo):
+                if (self._plotIndex == -1):
+                    # plt.close('all')
+                    self._plotIndex = 0
+                    f, self._axarr = plt.subplots(2,2)
+                    self._axarr[0,0].plot(self._traj[:,0],self._traj[:,1:8])
+                    self._axarr[0,0].set_title('Iterations = 0')
             # print "replacing segment"
             self._traj = np.delete(self._traj,range(int(self._ind1),int(self._ind2+1)),0)
             self._traj[self._ind1:,0] += new_dur - old_dur
             self._traj = np.insert(self._traj,self._ind1,self._s,0)
+            if (self._plot_demo):
+                if self._plotIndex == 0:
+                    self._axarr[0,1].plot(self._traj[:,0],self._traj[:,1:8])
+                    title = "Iterations = " + str(self._plotIndex+1)
+                    self._axarr[0,1].set_title(title)
+                    self._plotIndex = 1
+                    # plt.show(block=False)
+                    # raw_input('Press enter to continue...')
+                elif self._plotIndex == 1:
+                    print('check 1')
+                    self._axarr[1,0].plot(self._traj[:,0],self._traj[:,1:8])
+                    title = "Iterations = " + str(self._plotIndex+1)
+                    self._axarr[1,0].set_title(title)
+                    self._plotIndex = 2
+                    print ('check 2')
+                     # plt.show(block=False)
+                elif self._plotIndex == 2:
+                    print ('check 3')
+                    self._axarr[1,1].plot(self._traj[:,0],self._traj[:,1:8])
+                    title = "Iterations = " + str(self._plotIndex+1)
+                    self._axarr[1,1].set_title(title)
+                    self._plotIndex = 3
+                    plt.show(block=False)
+                    wm = plt.get_current_fig_manager()
+                    wm.window.wm_geometry("800x500+1000+0")
+                    raw_input('Press enter to continue...')
+                    plt.close('all')
         else:
             self._iter -=1
         if self._iter < 30:

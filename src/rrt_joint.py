@@ -41,7 +41,7 @@ def find_path(plot, pos):
 
     if (plot == True):
         plt.close('all')
-        plt.figure(1)
+        plt.figure()
         plt.hold(False)
         plt.plot(traj_y,traj_z,'r',linewidth=2)
         plt.hold(True)
@@ -52,11 +52,12 @@ def find_path(plot, pos):
         plt.ylabel('Z position (m)')
         plt.title('Desired trajectory')
         plt.show(block=False)
+        wm = plt.get_current_fig_manager()
+        wm.window.wm_geometry("800x500+1000+0")
+        # wm.window.setGeometry(800,500,0,0)
         raw_input("Press enter to continue...")
     # plt.show(block=False)
-    # wm = plt.get_current_fig_manager()
-    # wm.window.wm_geometry("800x500+0+0")
-    # wm.window.setGeometry(800,500,0,0)
+
 
     print('found release state')
     print pos_goal
@@ -143,6 +144,7 @@ def find_path(plot, pos):
         plt.plot(stepList[:,1],stepList[:,2],'g',linewidth=2)
         plt.show(block=False)
         raw_input('Press enter to continue...')
+        plt.close('all')
 
 
     # if (plot):
@@ -180,7 +182,7 @@ def build_tree(iter,treeA, treeB ,edgesA, edgesB, plot, kdl_kin):
     iterations = i
 
     if (plot):
-        plt.close('all')
+        # plt.close('all')
 
         # fig = plt.figure()
         # ax = fig.gca(projection='3d')
@@ -199,6 +201,7 @@ def build_tree(iter,treeA, treeB ,edgesA, edgesB, plot, kdl_kin):
         for i in range(iterations):
             pos3B[i,:]=kdl_kin.forward(treeB[i,:7])[0:3,3].transpose()
         fig = plt.figure(1)
+        plt.hold(False)
         # ax = fig.gca(projection='3d')
         plt.plot(pos3A[:,1],pos3A[:,2],'r.')
         plt.hold(True)
@@ -301,6 +304,6 @@ def nearest_neighbor(joints, vels, tree, nodes):
 
 if __name__ == "__main__":
     start = time.time()
-    find_path(False, 1)
+    find_path(True, 1)
     end = time.time()
     print end-start

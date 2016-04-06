@@ -52,7 +52,7 @@
   <!-- state validity checker -->
   <group if="$(arg check)">
   <node name="collision_checking_node" pkg="baxter_throw"
-      type="check_state_for_collisions.py" output="screen" launch-prefix="xterm -e"
+      type="check_state_for_collisions.py" output="screen" launch-prefix="xterm -geom 100x30+1400+600 -e"
       respawn="true">
     <remap from="/joint_states" to="/robot/joint_states" />
   </node>
@@ -68,9 +68,9 @@
   <!-- start nodes -->
   <node name="throw" pkg="baxter_throw" type="throw_path.py" output="screen"/>
   <node name="set_catch_position" pkg="baxter_throw" type="set_catch_position.py" output="screen"/>
-  <node name="collision_publisher" pkg="baxter_throw" type="check_rrt_joint.py" output="screen">
-    <param name="plot_demo" value="$(arg demo)" />
+  <node name="collision_publisher" pkg="baxter_throw" type="check_rrt_joint.py" output="screen" launch-prefix="xterm -geom 100x30+690+600 -e" respawn="true">
+      <param name="plot_demo" value="$(arg demo)" />
   </node>
-  <node name="input_state" pkg="baxter_throw" type="input_state.py" output="screen" launch-prefix="xterm -e" respawn="true"/>
+  <node name="input_state" pkg="baxter_throw" type="input_state.py" output="screen" launch-prefix="xterm -geom 100x30+0+600 -e" respawn="true"/>
 
 </launch>
