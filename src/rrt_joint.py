@@ -29,6 +29,35 @@ def find_path(plot, pos):
     elif pos == 3:
         catch_y = .3
     pos_goal = find_feasible_release(catch_x, catch_y, catch_z, pos)
+    block_width = .047
+    throw_y = pos_goal[0]
+    throw_z = pos_goal[1]
+    dy = catch_y - throw_y - block_width
+    vel = pos_goal[2]
+    alpha = pos_goal[3]
+    t = np.linspace(0,dy/(vel*cos(alpha)),100)
+    traj_y = vel*cos(alpha)*t + throw_y;
+    traj_z = -.5*9.8*t**2 + vel*sin(alpha)*t + throw_z
+
+    if (plot == True):
+        plt.close('all')
+        plt.figure(1)
+        plt.hold(False)
+        plt.plot(traj_y,traj_z,'r',linewidth=2)
+        plt.hold(True)
+        plt.plot(traj_y[0],traj_z[0],'r.',markersize=15)
+        plt.ylim([-.8, .5])
+        plt.xlim([-.2, .8])
+        plt.xlabel('Y position (m)')
+        plt.ylabel('Z position (m)')
+        plt.title('Desired trajectory')
+        plt.show(block=False)
+        raw_input("Press enter to continue...")
+    # plt.show(block=False)
+    # wm = plt.get_current_fig_manager()
+    # wm.window.wm_geometry("800x500+0+0")
+    # wm.window.setGeometry(800,500,0,0)
+
     print('found release state')
     print pos_goal
 
@@ -88,12 +117,6 @@ def find_path(plot, pos):
     pathA[ind] = treeA[curEdge[0]]
     pathA = pathA[0:ind+1,:]
 
-
-    if (plot):
-        fig = plt.figure(1)
-        ax = fig.gca(projection='3d')
-        # ax.plot(pathA[:,0],pathA[:,1],pathA[:,2],'g',linewidth=5)
-
     pathB = np.empty((edgesB.shape[0],14))
     pathB[0] = treeB[indB]
     curEdge = edgesB[indB-1]
@@ -105,6 +128,7 @@ def find_path(plot, pos):
         curEdge = edgesB[curEdge[0] - 1]
         if curEdge[0] == 0:
             atOrigin = True
+            ind += 1
         else:
             ind += 1
     pathB[ind] = treeB[curEdge[0]]
@@ -113,14 +137,19 @@ def find_path(plot, pos):
     path = np.vstack((pathA[::-1],pathB))
 
     if (plot):
-        ax.plot(path[:,0],path[:,1],path[:,2],'g',linewidth=5)
+        stepList = np.empty((path.shape[0],3))
+        for i in range(path.shape[0]):
+            stepList[i] = kdl_kin.forward(path[i,:7])[0:3,3].transpose()
+        plt.plot(stepList[:,1],stepList[:,2],'g',linewidth=2)
         plt.show(block=False)
+        raw_input('Press enter to continue...')
 
-    if (plot):
-        plt.figure()
-        plt.plot(path[:,0:7],'.')
-        plt.show(block=False)
-        print(path.shape)
+
+    # if (plot):
+    #     plt.figure()
+    #     plt.plot(path[:,0:7],'.')
+    #     plt.show(block=False)
+    #     print(path.shape)
 
     return path
 
@@ -142,40 +171,69 @@ def build_tree(iter,treeA, treeB ,edgesA, edgesB, plot, kdl_kin):
         result = connect_trees(treeA, treeB, i, kdl_kin)
         # print(result[0],i)
         if (result[0]):
+            print "iterated up to: "
             print i
             break
 
         i = i + 1
 
+    iterations = i
 
     if (plot):
         plt.close('all')
 
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
-        ax.scatter(treeA[0,0],treeA[0,1],treeA[0,2],'r')
-        ax.plot(treeA[0:i+2,0],treeA[0:i+2,1],treeA[0:i+2,2],'r.')
-        ax.scatter(treeB[0,0],treeB[0,1],treeB[0,2],'b')
-        ax.plot(treeB[0:i+2,0],treeB[0:i+2,1],treeB[0:i+2,2],'b.')
-        plt.show(block=False)
+        # fig = plt.figure()
+        # ax = fig.gca(projection='3d')
+        # ax.scatter(treeA[0,0],treeA[0,1],treeA[0,2],'r')
+        # ax.plot(treeA[0:i+2,0],treeA[0:i+2,1],treeA[0:i+2,2],'r.')
+        # ax.scatter(treeB[0,0],treeB[0,1],treeB[0,2],'b')
+        # ax.plot(treeB[0:i+2,0],treeB[0:i+2,1],treeB[0:i+2,2],'b.')
+        # plt.show(block=False)
+        robot = URDF.from_parameter_server()
+        base_link = robot.get_root()
+        kdl_kin = KDLKinematics(robot, base_link, 'right_gripper_base')
+        pos3A = np.empty((iterations,3))
+        for i in range(iterations):
+            pos3A[i,:]=kdl_kin.forward(treeA[i,:7])[0:3,3].transpose()
+        pos3B = np.empty((iterations,3))
+        for i in range(iterations):
+            pos3B[i,:]=kdl_kin.forward(treeB[i,:7])[0:3,3].transpose()
+        fig = plt.figure(1)
+        # ax = fig.gca(projection='3d')
+        plt.plot(pos3A[:,1],pos3A[:,2],'r.')
+        plt.hold(True)
+        plt.plot(pos3A[0,1],pos3A[0,2],'r.',markersize=15)
+        plt.plot(pos3B[:,1],pos3B[:,2],'b.')
+        plt.plot(pos3B[0,1],pos3B[0,2],'b.',markersize=15)
+        plt.xlabel('EE y-coordinate')
+        plt.ylabel('EE z-coordinate')
+        plt.title('RRT in end-effector space')
+        # plt.show(block=False)
+
 
     if (result[0]):
         indA = result[1];
         indB = result[2];
-        if (plot):
-            ax.scatter([treeA[indA,0], treeB[indB,0]],[treeA[indA,1], treeB[indB,1]],[treeA[indA,2], treeB[indB,2]],'g')
+        # if (plot):
+            # ax.scatter([treeA[indA,0], treeB[indB,0]],[treeA[indA,1], treeB[indB,1]],[treeA[indA,2], treeB[indB,2]],'g')
     else:
         indA = 0
         indB = 0
     if (plot):
-        plt.xlim([-1.5, 1.5])
-        plt.ylim([-1.5, 1.5])
-        for k in range(i):
-            ax.plot([treeA[edgesA[k,0]][0],treeA[edgesA[k,1]][0]],[treeA[edgesA[k,0]][1],treeA[edgesA[k,1]][1]],[treeA[edgesA[k,0]][2],treeA[edgesA[k,1]][2]],'r')
-            ax.plot([treeB[edgesB[k,0]][0],treeB[edgesB[k,1]][0]],[treeB[edgesB[k,0]][1],treeB[edgesB[k,1]][1]],[treeB[edgesB[k,0]][2],treeB[edgesB[k,1]][2]],'b')
-        plt.show(block=False)
+        # plt.xlim([-1.5, 1.5])
+        # plt.ylim([-1.5, 1.5])
+        for k in range(iterations+1):
+            edge1 = kdl_kin.forward(treeA[edgesA[k,0],:7])[0:3,3].transpose()
+            edge2 = kdl_kin.forward(treeA[edgesA[k,1],:7])[0:3,3].transpose()
+            plt.plot([edge1[0,1],edge2[0,1]],[edge1[0,2],edge2[0,2]],'r',linewidth=3)
+            edge1 = kdl_kin.forward(treeB[edgesB[k,0],:7])[0:3,3].transpose()
+            edge2 = kdl_kin.forward(treeB[edgesB[k,1],:7])[0:3,3].transpose()
+            plt.plot([edge1[0,1],edge2[0,1]],[edge1[0,2],edge2[0,2]],'b',linewidth=3)
+        # plt.show(block=False)
 
-    return treeA[0:i+2,:], treeB[0:i+2,:], edgesA[0:i+1,:], edgesB[0:i+1,:], indA, indB
+    # raw_input('Enter...')
+
+    return treeA[0:iterations+2,:], treeB[0:iterations+2,:], edgesA[0:iterations+1,:], edgesB[0:iterations+1,:], indA, indB
 
 def connect_trees(treeA, treeB, iter, kdl_kin):
 
@@ -243,6 +301,6 @@ def nearest_neighbor(joints, vels, tree, nodes):
 
 if __name__ == "__main__":
     start = time.time()
-    find_path(True)
+    find_path(False, 1)
     end = time.time()
     print end-start

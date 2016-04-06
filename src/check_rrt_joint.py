@@ -12,6 +12,15 @@ import matplotlib.pyplot as plt
 from path_smooth import shortcut, path2traj
 from random import random
 
+def get_param(name, value=None):
+    private = "~%s" % name
+    if rospy.has_param(private):
+        return rospy.get_param(private)
+    elif rospy.has_param(name):
+        return rospy.get_param(name)
+    else:
+        return value
+
 class Checker(object):
     def __init__(self):
         self._coll_checked = False
@@ -22,7 +31,10 @@ class Checker(object):
         self._iter = 0
         self._executing = True
         self._sub_demo_state = rospy.Subscriber('demo_state', Int16, self.sub_demo)
-        self._sub_pos_state = rospy.Subscriber('pos_state', Int16, self.sub_pos)    
+        self._sub_pos_state = rospy.Subscriber('pos_state', Int16, self.sub_pos) 
+        self._plot_demo = get_param('plot_demo', False)
+        rospy.loginfo("Here's my demo state: ")
+        rospy.loginfo(self._plot_demo)
 
     def sub_pos(self,a):
         rospy.loginfo('received pos')
@@ -34,7 +46,7 @@ class Checker(object):
         rospy.loginfo('received start command')
         self._iter = 0
         self._start = rospy.get_time()
-        self._path = find_path(False, self._pos_state)
+        self._path = find_path(self._plot_demo, self._pos_state)
         rospy.loginfo('path found')
         self.publish_joints()
 
@@ -76,12 +88,12 @@ class Checker(object):
             self._pub_traj.publish(a)   
         else:
             rospy.loginfo("trying again")
-            self._path = find_path(False, self._pos_state)
+            self._path = find_path(self._plot_demo, self._pos_state)
             self._iter = 0
             self.publish_joints()
 
     def find_new_path(self):
-        self._path = find_path(False, self._pos_state)
+        self._path = find_path(self._plot_demo, self._pos_state)
         self.publish_joints()
 
     def publish_joints(self):

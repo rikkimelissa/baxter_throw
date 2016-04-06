@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 catch_x = .8
 catch_z = -.6 # range from - .5 to 0 # lower range determined by baxter
 catch_y = .5 # range from -.3 to .7, works after .5 but hard to find solutions
+pos = 1
 
 def main():
     plt.close('all')

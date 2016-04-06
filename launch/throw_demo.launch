@@ -6,6 +6,7 @@
   <arg name="grip" default="false" /> <!-- add grippers? -->
   <arg name="traj" default="false" /> <!-- trajectory execution? -->
   <arg name="check" default="true" /> <!-- check state validity? -->
+  <arg name="demo" default="false" />
   
   <!-- start gazebo -->
   <group if="$(arg sim)" >
@@ -67,7 +68,9 @@
   <!-- start nodes -->
   <node name="throw" pkg="baxter_throw" type="throw_path.py" output="screen"/>
   <node name="set_catch_position" pkg="baxter_throw" type="set_catch_position.py" output="screen"/>
-  <node name="collision_publisher" pkg="baxter_throw" type="check_rrt_joint.py" output="screen"/>
+  <node name="collision_publisher" pkg="baxter_throw" type="check_rrt_joint.py" output="screen">
+    <param name="plot_demo" value="$(arg demo)" />
+  </node>
   <node name="input_state" pkg="baxter_throw" type="input_state.py" output="screen" launch-prefix="xterm -e" respawn="true"/>
 
 </launch>
