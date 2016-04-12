@@ -39,6 +39,12 @@ def find_path(plot, pos):
     traj_y = vel*cos(alpha)*t + throw_y;
     traj_z = -.5*9.8*t**2 + vel*sin(alpha)*t + throw_z
 
+    print "recording"
+    fo = open("dataTest.txt", "a")
+    data = "\n\r" + str(throw_y) + " " + str(throw_z) + " " + str(vel*cos(alpha)) + " " + str(vel*sin(alpha)) + " "
+    print data
+    fo.write(data)
+
     if (plot == True):
         plt.close('all')
         plt.figure()
@@ -86,12 +92,21 @@ def find_path(plot, pos):
     q_goal = q_ik
     # print q_goal
 
+    for joint in q_goal:
+        data = str(joint) + " "
+        fo.write(data)
+
     # Transform to joint velocities using Jacobian
     jacobian = kdl_kin.jacobian(q_ik)
     inv_jac = np.linalg.pinv(jacobian)
     Vb = np.array([0,0,0,0,pos_goal[2],pos_goal[3]])
     q_dot_goal = inv_jac.dot(Vb)
 
+    for joint_vel in q_dot_goal.tolist()[0]:
+        data = str(joint_vel) + " "
+        fo.write(data)
+
+    fo.close()
 
     iter = 1000;
 
@@ -304,6 +319,6 @@ def nearest_neighbor(joints, vels, tree, nodes):
 
 if __name__ == "__main__":
     start = time.time()
-    find_path(True, 1)
+    find_path(False, 1)
     end = time.time()
     print end-start

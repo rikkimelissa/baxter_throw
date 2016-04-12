@@ -1,0 +1,76 @@
+<launch>
+  <!-- define args -->
+  <arg name="vis" default="false" /> <!-- run rviz? -->
+  <arg name="gui" default="false" /> <!-- run joint_state_publisher? -->
+  <arg name="sim" default="false" /> <!-- start gazebo? -->
+  <arg name="grip" default="false" /> <!-- add grippers? -->
+  <arg name="traj" default="false" /> <!-- trajectory execution? -->
+  <arg name="check" default="true" /> <!-- check state validity? -->
+  <arg name="demo" default="false" />
+  
+  <!-- start gazebo -->
+  <group if="$(arg sim)" >
+  <include file="$(find baxter_gazebo)/launch/baxter_world.launch" />
+  </group>
+  
+  <!-- start JTAS -->
+  <node name="jtas" pkg="baxter_interface" type="joint_trajectory_action_server.py" />
+
+  <!-- start move group and moveit planning context -->
+  <include file="$(find baxter_moveit_config)/launch/planning_context.launch">
+    <arg name="load_robot_description" value="true"/>
+  </include>
+
+  <include file="$(find baxter_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="$(arg traj)"/>
+  </include>
+
+
+  <group if="$(arg grip)">
+    <node pkg="baxter_throw" type="add_grippers.sh" name="gripper_modifier"
+        output="screen" respawn="false" />
+  </group>
+  
+  <!-- MoveIt! Configurations: -->
+  <group if="$(arg traj)">
+  <node pkg="baxter_interface" type="joint_trajectory_action_server.py"
+      name="joint_trajectory_action_server" />
+  </group>
+
+  <!-- joint state publisher -->
+  <group if="$(arg gui)">
+    <node name="joint_state_publisher" pkg="joint_state_publisher"
+      type="joint_state_publisher">
+    <remap from="/joint_states" to="/robot/joint_states" />
+    <param name="use_gui" value="$(arg gui)" />
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen">
+      <remap from="/joint_states" to="/robot/joint_states" />
+  </node>
+  </group>
+
+  <!-- state validity checker -->
+  <group if="$(arg check)">
+  <node name="collision_checking_node" pkg="baxter_throw"
+      type="check_state_for_collisions.py" output="screen" launch-prefix="xterm -geom 100x30+1400+600 -e"
+      respawn="true">
+    <remap from="/joint_states" to="/robot/joint_states" />
+  </node>
+  </group>
+  
+
+  <!-- rviz if needed -->
+  <group if="$(arg vis)">
+    <node pkg="rviz" type="rviz" respawn="false" name="rviz"
+      args="-d $(find collision_check_demo)/launch/collision_demo.rviz" />
+  </group>
+
+  <!-- start nodes -->
+  <node name="throw" pkg="baxter_throw" type="throw_path_record.py" output="screen"/>
+  <node name="set_catch_position" pkg="baxter_throw" type="set_catch_position.py" output="screen"/>
+  <node name="collision_publisher" pkg="baxter_throw" type="check_rrt_joint_record.py" output="screen" launch-prefix="xterm -geom 100x30+690+600 -e" respawn="true">
+      <param name="plot_demo" value="$(arg demo)" />
+  </node>
+  <node name="input_state" pkg="baxter_throw" type="input_state.py" output="screen" launch-prefix="xterm -geom 100x30+0+600 -e" respawn="true"/>
+
+</launch>

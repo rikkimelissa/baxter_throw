@@ -4,7 +4,7 @@ import rospy
 import numpy as np
 from std_msgs.msg import Float32MultiArray, Int16
 from rospy.numpy_msg import numpy_msg
-from rrt_joint import find_path
+from rrt_joint_record import find_path
 from urdf_parser_py.urdf import URDF
 from pykdl_utils.kdl_kinematics import KDLKinematics
 from functions import RpToTrans
@@ -125,7 +125,6 @@ class Checker(object):
                 if (self._plotIndex == -1):
                     # plt.close('all')
                     self._plotIndex = 0
-                    # plt.figure()
                     f, self._axarr = plt.subplots(2,2)
                     self._axarr[0,0].plot(self._traj[:,0],self._traj[:,1:8])
                     self._axarr[0,0].set_title('Iterations = 0')
@@ -193,9 +192,6 @@ class Checker(object):
                 self._ind1 = self._ind2;
                 self._ind2 = temp
             if (self._ind1 != self._ind2):
-                print "path legth is " + str(path_length)
-                print "ind1 is " + str(self._ind1)
-                print "list is " + str(self._traj)
                 self._vertex1 = self._traj[self._ind1,:]
                 self._vertex2 = self._traj[self._ind2,:]
                 if np.isfinite(self._vertex1).all() and np.isfinite(self._vertex2).all() and (self._vertex1 < 10).all() and (self._vertex2 < 10).all():
