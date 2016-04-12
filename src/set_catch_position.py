@@ -22,7 +22,7 @@ def move_to(pos):
     pub_demo_state = rospy.Publisher('demo_state',Int16, queue_size = 10)
 
     if (pos == 1):
-        catch = np.array([.65, .25, 0]) # my .7?
+        catch = np.array([.65, .2, 0]) # my .7?
         R = np.array([[ 0.26397895, -0.34002068,  0.90260791],
         [-0.01747676, -0.93733484, -0.34799134],
         [ 0.96437009,  0.07608772, -0.25337913]])

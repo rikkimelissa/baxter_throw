@@ -13,6 +13,10 @@ See a demo of the robot throwing a ball to three distinct positions here:
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=ygJIfao9ul8" target="_blank"><img src="http://img.youtube.com/vi/ygJIfao9ul8/0.jpg" 
 alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" align="center" /></a>
 
+See another demo of the robot throwing the ball from flexible starting positions:
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=1N4T0F9NE4U" target="_blank"><img src="http://img.youtube.com/vi/1N4T0F9NE4U/0.jpg" 
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" align="center" /></a>
+
 This implementation relies on work from the following sources:
 
 > Zhang, Yajia, Jingru Luo, and Kris Hauser. "Sampling-based motion planning with dynamic intermediate state objectives: Application to throwing." Robotics and Automation (ICRA), 2012 IEEE International Conference on. IEEE, 2012.
@@ -32,7 +36,7 @@ An example is shown below of 30 sampled release points and their trajectories; t
 ![](https://raw.githubusercontent.com/rikkimelissa/baxter_throw/master/src/images/final_sample_release_points.png)
 
 #### Kinodynamic RRT  <a name="Movement"></a>
-This task finds a path from a given start position and velocity to the sampled position and velocity for each of Baxter's seven joints while obeying physically-based dynamic models and avoiding position and velocity limits. This approach is tailored to trajectory planning in high-dimensional state spaces and is therefore a good approach for the 14-DOF system. It utilizes a bidirectional RRT to speed up the sampling process.
+This task finds a path from the current arm position and velocity to the sampled position and velocity for each of Baxter's seven joints while obeying physically-based dynamic models and avoiding position and velocity limits. This approach is tailored to trajectory planning in high-dimensional state spaces and is therefore a good approach for the 14-DOF system. It utilizes a bidirectional RRT to speed up the sampling process.
 
 An example is shown below for a 2-DOF system using a bidirectional kinodynamic RRT and the resulting path.
 
@@ -51,6 +55,10 @@ This tasks employs a shortcutting method to smooth jerky trajectories for high D
 Below is an example of the shortcutting method over 30 iterations. It smooths the path and reduces the overall time.
 
 ![](https://raw.githubusercontent.com/rikkimelissa/baxter_throw/master/src/images/final_progression3.png)
+
+#### Performance
+
+From the nominal starting position, the throwing accuracy is about 8 out of 10. From a flexible starting position, the accuracy is much worse. The inconsistency is a problem beyond the scope of this project, as there is no clear relationship between the path and the time of the release, and this is the largest perceived source of error. An effort is being made to use machine learning algorithms to figure out which starting conditions and path correspond to the highest accuracy.
 
 #### Important nodes <a name="nodes"></a>
 * `check_rrt_joint.py` iterates through RRT and path smoothing and sends results to the collision checker
