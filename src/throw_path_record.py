@@ -141,9 +141,13 @@ class Trajectory(object):
         velLim = np.array([2, 2, 2, 2, 4, 4, 4])
         fo = open("dataTest.txt", "a")
         for i in range(7):
-            data = str(np.amax(self._pArm[:,i])) + " " str(np.amin(self._pArm[:,i])) + \
-              " " str(np.amax(abs(self._vArm[:,i]))) + str(np.amax(abs(self._aArm[:,i]))) 
-
+            pMax = np.amax(self._pArm[:,i])
+            pMin = np.amin(self._pArm[:,i])
+            vMax = np.amax(abs(self._vArm[:,i]))
+            data = str(pMax) + " " str(pMin) + \
+              " " str(vMax) + str(np.amax(abs(self._aArm[:,i]))) + " " + \
+              str(posLimMax[i] - pMax) + " " + str(pMin - posLimMin[i]) + " " \
+              + str(velLim[i] - vMax)
             fo.write(data)
         print "recording data"
         fo.close()
