@@ -140,17 +140,23 @@ class Trajectory(object):
         posLimMin = np.array([-1.7, -2.1, -3.05, -.05, -3.05, -1.57, -3.05])
         velLim = np.array([2, 2, 2, 2, 4, 4, 4])
         fo = open("dataTest.txt", "a")
+        data = str(self._time[N-1]) + " "
+        fo.write(data)
+        data = str(N) + " "
+        fo.write(data)
         for i in range(7):
+            print i
+            print posLimMax[i]
             pMax = np.amax(self._pArm[:,i])
             pMin = np.amin(self._pArm[:,i])
             vMax = np.amax(abs(self._vArm[:,i]))
-            data = str(pMax) + " " str(pMin) + \
-              " " str(vMax) + str(np.amax(abs(self._aArm[:,i]))) + " " + \
+            data = str(pMax) + " " + str(pMin) + \
+              " " + str(vMax) + " " + str(np.amax(abs(self._aArm[:,i]))) + " " + \
               str(posLimMax[i] - pMax) + " " + str(pMin - posLimMin[i]) + " " \
-              + str(velLim[i] - vMax)
+              + str(velLim[i] - vMax) + " "
+            print data
             fo.write(data)
         print "recording data"
-        fo.close()
 
         for i in range(N):
             self.add_point(self._pArm[i,:].tolist(), self._vArm[i,:].tolist(), self._aArm[i,:].tolist(), self._time[i]+self._t_delay+1)
@@ -166,6 +172,10 @@ class Trajectory(object):
         self.start()
         self.wait(10)
         self.clear('right')
+
+        val = raw_input('Catch success? (1 = yes, 0 = no)')
+        fo.write(str(val))
+        fo.close()
 
 def main():
 
