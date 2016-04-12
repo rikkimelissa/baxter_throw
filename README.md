@@ -14,6 +14,7 @@ See a demo of the robot throwing a ball to three distinct positions here:
 alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" align="center" /></a>
 
 See another demo of the robot throwing the ball from flexible starting positions:
+
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=1N4T0F9NE4U" target="_blank"><img src="http://img.youtube.com/vi/1N4T0F9NE4U/0.jpg" 
 alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" align="center" /></a>
 
