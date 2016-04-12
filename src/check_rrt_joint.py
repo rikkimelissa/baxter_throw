@@ -209,6 +209,7 @@ class Checker(object):
                     # print ("here")
                     # x+=1
                     if self._iter < 30:
+                        self._iter += 1
                         self.smooth_path()
                     else:
                         # print "sent to publish"

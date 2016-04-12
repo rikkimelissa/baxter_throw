@@ -8,7 +8,7 @@ from release_state_solve import find_feasible_release
 from urdf_parser_py.urdf import URDF
 from pykdl_utils.kdl_kinematics import KDLKinematics
 from functions import RpToTrans
-
+import baxter_interface
 
 catch_x = .8
 # catch_y = .1 # .7
@@ -17,9 +17,14 @@ catch_z = -.6 # -.6 # range from - .5 to 0 # lower range determined by baxter
 def find_path(plot, pos):
 
     # Set initial position
-    pos_init = [-.62, -.1, 0, 0]
     q_start = np.array([-0.22281071, -0.36470393,  0.36163597,  1.71920897, -0.82719914,
        -1.16889336, -0.90888362])
+
+    limb_interface = baxter_interface.limb.Limb('right')
+    angles = limb_interface.joint_angles()
+    for ind, joint in enumerate(limb_interface.joint_names()):
+        q_start[ind] = angles[joint] 
+    print q_start
 
     # Find goal for throwing
     if pos == 1:
