@@ -74,8 +74,8 @@ From the nominal starting position, the throwing accuracy is about 8 out of 10. 
 
   *  Baxter SDK - follow the [Workstation Setup](http://sdk.rethinkrobotics.com/wiki/Workstation_Setup) Instructions
   * pykdl_utils package - clone [this](https://github.com/gt-ros-pkg/hrl-kdl.git ) repository
-  * urdf package with apt-get install ros-version-urdfdom-py
-  * kdl package with apt-get install ros-version-kdl-conversions
+  * urdf package with apt-get install ros-<version>-urdfdom-py
+  * kdl package with apt-get install ros-<version>-kdl-conversions
 
 #### Instructions for running files  <a name="Instructions"></a>
 
